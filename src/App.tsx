@@ -1,25 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
+import './App.css';
+import { BrowserRouter, Routes, Route, Navigate  } from 'react-router';
+import LoginPage from './pages/loginPage'
+import MainPage from './pages/mainPage'
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path='main'  element={< MainPage />} />
+        
+        {/* 
+        <Route path='companies' element={<CompanyPages />}/>
+        <Route path='users' element={<UnapprovalUsersPage />}/>
+        <Route path="events" >
+              <Route index element={<EventsPage />} />   
+              <Route path=":eventId" element= { < DetailedEventPage/>} />
+        </Route> */}
+        
+      </Routes>
+    </BrowserRouter>
   );
 }
 
