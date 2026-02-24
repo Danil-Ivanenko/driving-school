@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styles from '../css/login.module.css'
-// import styles from './Login.module.css'; 
+import { api } from '../API/api';
+import axios from 'axios';
+import { ErrorResponse, tokenResponse } from '../types';
 
 
 const LoginPage: React.FC = () => {
@@ -11,14 +13,18 @@ const LoginPage: React.FC = () => {
 
     const handleSubmit = async (event: React.SubmitEvent) => {
         event.preventDefault(); 
-        if (email == "123")
+        const  data  = await api.login(email, password);
+        
+        if(axios.isAxiosError<ErrorResponse>(data))
         {
-            setError("Error")
+            setError(data.response?.data.message || "")
         }
-        else
+        else if(data as tokenResponse)
         {
+            localStorage.setItem('token', (data as tokenResponse).token);
             window.location.href = '/main'
         }
+
     };
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +36,7 @@ const LoginPage: React.FC = () => {
         setPassword(event.target.value); 
         setError('');
     };
+    
 
     return (
         <div className={styles.App}>

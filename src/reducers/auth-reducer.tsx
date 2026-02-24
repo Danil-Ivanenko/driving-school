@@ -58,13 +58,13 @@ export const authReducer = (
       }
 };
 
-export const testFetch = () => {
-    return async (dispatch: Dispatch<AuthActions>) => 
-    {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        dispatch( {type: LOGIN_FAILURE, error: "test"});
-    }
-}
+// export const testFetch = () => {
+//     return async (dispatch: Dispatch<AuthActions>) => 
+//     {
+//         await new Promise(resolve => setTimeout(resolve, 1000));
+//         dispatch( {type: LOGIN_FAILURE, error: "test"});
+//     }
+// }
 
 
 

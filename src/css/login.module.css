@@ -61,10 +61,10 @@ input {
 }
 
 
-button {
+.button {
   padding: 10px 20px;
   /* background-color: #007bff;  #007bff; */
-  background-color: black;  
+  background-color: #007bff;  
   color: white;
   border: none;
   border-radius: 4px;

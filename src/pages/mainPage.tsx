@@ -1,44 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../css/mainPage.css'
 import styles from '../css/login.module.css'
+import { useTypedSelector } from '../store';
+import { useDispatch } from 'react-redux';
+import { api } from '../API/api';
+import {GetChannelsThunk, SetSelectedChannelActionCreator} from '../reducers/channel-reducer'
+import { Channel } from '../types';
+import { Dispatch } from 'redux';
+import Cources from '../Components/Courses'
+
 const MainPage: React.FC = () => {
+    const channelState = useTypedSelector(state => state.channels); 
+    const dispatch: any = useDispatch()
+
+    useEffect(() => {
+        dispatch(GetChannelsThunk())
+    }, [])
+
+
 
     return (
+        
     <div className="app-container">
+        
+        <header className='header'>
+           <p className='mainName'> Автошкола</p>
+           <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
+                <div className='course-block'> Пользователи</div>
+           </div>
+        </header>
+        
 
-
+        
 
         <div className={`main-content`}>
             
-            <div style={{display: "flex", flexDirection: "column"}}>
-                <p className='mainName'> Автошкола</p>
-                
-            </div>
-            
             <div className='containerRow'>
-                <div className='containerCol' style={{maxWidth: "500px", maxHeight: '100vh',  overflowY: 'auto'}}>
 
-                    <div className='simpleForm' style={{gap : "10px"}}>
-                        
-                        <div style={{display: "grid", placeItems : "center", gap : "10px"}}>
-                            <p style={{margin : "0px",  fontSize : "16px"}}> Добавить курс</p>
-                            <input  />
-                            <button className={styles.button} style={{width : "100%"}} >
-                                Добавить
-                            </button>
-                        </div>
-
-                        <div className="course-block">Python-разработчик</div>
-                        <div className="course-block">JavaScript-программист </div>
-                        <div className="course-block">Web-дизайнер</div>
-                      
-
-
-
-                    </div>
-                    
-                </div>
-
+                    <Cources/>
 
                     <div className='containerCol' style={{ maxHeight: '100vh',   overflowY: 'auto'}}>
                     
@@ -64,6 +63,7 @@ const MainPage: React.FC = () => {
         </div>
 
     </div>
+
     );
 };
 
