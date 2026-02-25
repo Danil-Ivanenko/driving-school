@@ -8,7 +8,7 @@ import {GetChannelsThunk, SetSelectedChannelActionCreator} from '../reducers/cha
 import { Channel } from '../types';
 import { Dispatch } from 'redux';
 import Cources from '../Components/Courses'
-
+import ChannelInfo from '../Components/ChannelInfo'
 const MainPage: React.FC = () => {
     const channelState = useTypedSelector(state => state.channels); 
     const dispatch: any = useDispatch()
@@ -39,23 +39,7 @@ const MainPage: React.FC = () => {
 
                     <Cources/>
 
-                    <div className='containerCol' style={{ maxHeight: '100vh',   overflowY: 'auto'}}>
-                    
-                        <div className='simpleForm'>
-                            <p> СОздать </p>
-                            <textarea style={{maxWidth : "100%", minWidth : "100%"}} >
-                               Какой-то текст
-                            </textarea>
-
-                        </div>
-
-
-                            <div className='simpleForm'>
-                                <p> Типо карточка</p>
-
-                            <hr className="hr" />
-                        </div>
-                    </div>
+                    <ChannelInfo/>
 
                     
             </div>

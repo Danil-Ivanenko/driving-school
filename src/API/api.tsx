@@ -40,11 +40,46 @@ async function GetChannels()   {
     
 };
 
+async function CreateChannel(name: string)   { 
+    try 
+    {
+        const formData = new FormData();
+        formData.append('name', name)
+        formData.append('userIds', '')
+        await instance.post('channel/create', formData,
+        {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+};
+
+async function DeleteChannel(id: string)   { 
+    try
+    {
+        await instance.delete(`channel/delete/${id}`,  {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }
+    })
+    }
+    catch(e)
+    {
+        return e
+    }
+};
 
 
 
 
 export const api = {
     login : login,
-    GetChannels : GetChannels
+    GetChannels : GetChannels,
+    CreateChannel: CreateChannel,
+    DeleteChannel: DeleteChannel
 }

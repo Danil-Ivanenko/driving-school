@@ -11,7 +11,7 @@ interface GetChannelsAction {
 
 interface SetSelectedChannelAction {
     type: typeof SET_SELECTED_CHANNEL,
-    payload: string
+    payload: Channel | null
 }
 
 export type ChannelActions = GetChannelsAction | SetSelectedChannelAction;
@@ -21,12 +21,12 @@ export const SET_SELECTED_CHANNEL = 'SET_SELECTED_CHANNEL';
 
 type ChannelState = {
     channels: Channel[],
-    selectedChannelId: string
+    selectedChannel: Channel | null
 };
 
 const initialState: ChannelState = {
       channels: [],
-      selectedChannelId: ""
+      selectedChannel: null
 };
 
 export const channelReducer = (
@@ -38,12 +38,12 @@ export const channelReducer = (
         case GET_CHANNELS:
             return {
             channels : action.payload,
-            selectedChannelId :  ""
+            selectedChannel :  null
             };
         case SET_SELECTED_CHANNEL:
             return {
                 ...state,
-                selectedChannelId: action.payload
+                selectedChannel: action.payload
             };
         default:
             return state;
@@ -67,9 +67,9 @@ export const GetChannelsThunk = () =>{
       payload: channels
 });
 
-export  const SetSelectedChannelActionCreator = ( channelId : string) : SetSelectedChannelAction => ({
+export  const SetSelectedChannelActionCreator = ( channel : Channel) : SetSelectedChannelAction => ({
     type: SET_SELECTED_CHANNEL,
-    payload: channelId
+    payload: channel
 });
 
 
