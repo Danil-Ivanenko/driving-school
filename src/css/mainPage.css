@@ -83,7 +83,10 @@
     justify-content: center;
     align-items: center;
 }
-
+.baseP
+{
+  margin: 0px;
+}
 
 
 .centerpointModal {

@@ -11,6 +11,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="login" element={<LoginPage />} />
         <Route path='main'  element={< MainPage />} />
+        {/* <Route path='mapost:postIDin'  element={<  />} /> */}
         
         {/* 
         <Route path='companies' element={<CompanyPages />}/>

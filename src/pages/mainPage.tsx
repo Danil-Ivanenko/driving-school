@@ -9,10 +9,11 @@ import { Channel } from '../types';
 import { Dispatch } from 'redux';
 import Cources from '../Components/Courses'
 import ChannelInfo from '../Components/ChannelInfo'
+import PostInfo from '../Components/PostInfo';
 const MainPage: React.FC = () => {
     const channelState = useTypedSelector(state => state.channels); 
     const dispatch: any = useDispatch()
-
+    const post = useTypedSelector(state => state.posts);
     useEffect(() => {
         dispatch(GetChannelsThunk())
     }, [])
@@ -39,9 +40,15 @@ const MainPage: React.FC = () => {
 
                     <Cources/>
 
-                    <ChannelInfo/>
+                    {post.selectedPost == null ? (
+                            <ChannelInfo/> 
+                        ): (
+                            <PostInfo/>
+                        )
+                    }
 
-                    
+
+
             </div>
 
         </div>

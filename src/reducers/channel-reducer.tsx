@@ -37,8 +37,8 @@ export const channelReducer = (
 
         case GET_CHANNELS:
             return {
-            channels : action.payload,
-            selectedChannel :  null
+            ...state,
+            channels : action.payload
             };
         case SET_SELECTED_CHANNEL:
             return {

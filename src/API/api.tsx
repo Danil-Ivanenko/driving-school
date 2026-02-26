@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post } from '../types';
 
 
 const baseURL ='http://localhost:8080/';
@@ -74,12 +74,71 @@ async function DeleteChannel(id: string)   {
     }
 };
 
+async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string)   { 
+    try
+    {
+        await instance.post(`posts`,
+        {
+            label: label,
+            text: text,
+            type: type,
+            deadline: deadline,
+            authorId : 1, //переделать
+            needMark: type == PostType.TASK ? true : false,
+            channelId: channelId
+        }, 
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+    }
+    catch(e)
+    {
+        return e
+    }
+};
 
 
+async function GetPosts(channelId: string)   { 
+    try 
+    {
+        const { data, status } = await instance.get<PostShort[]>(`posts/channel/${channelId}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+        return data
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+};
+async function GetPost(postId: string)   { 
+    try 
+    {
+        const { data, status } = await instance.get<Post>(`posts/${postId}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+        return data
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+};
 
 export const api = {
     login : login,
     GetChannels : GetChannels,
     CreateChannel: CreateChannel,
-    DeleteChannel: DeleteChannel
+    DeleteChannel: DeleteChannel,
+    CreatePost: CreatePost,
+    GetPosts: GetPosts,
+    GetPost: GetPost,
 }

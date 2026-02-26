@@ -6,6 +6,7 @@ import CreateCourseDialog from './Components/CreateCourseDialog'
 import { Provider } from 'react-redux';
 import store from './store' 
 import DeleteChannel from './Components/DeleteChannel';
+import CreatePostDialog from './Components/CreatePostDialog';
 
 describe('CreateCourseDialog Component', () => {
     const setup = () => {
@@ -74,6 +75,42 @@ describe('DeleteChannel Component', () => {
     expect(screen.queryByText('Удалить курс?')).not.toBeInTheDocument();
   });
 });
+
+
+describe('CreatePostDialog Component', () => {
+    const setup = () => {
+
+    render(
+      <Provider store={store}>
+        <CreatePostDialog />
+      </Provider>
+    );
+
+    const openButton = screen.getByText( 'Создать запись' );
+    
+    return { openButton };
+  };
+  
+  test('Открывается модальное окно', async () => {
+
+    const { openButton } = setup();
+    fireEvent.click(openButton);
+    expect(screen.getByText('Название записи*')).toBeInTheDocument();
+
+  });
+
+    test('Закрывается модальное окно', async () => {
+
+    const { openButton} = setup();
+    fireEvent.click(openButton);
+    const closeButton = screen.getByText('Отмена');
+
+    fireEvent.click(closeButton);
+    expect(screen.queryByText('Название записи*')).not.toBeInTheDocument();
+  });
+});
+
+
 // describe('LoginPage Component', () => {
 
 
