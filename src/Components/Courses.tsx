@@ -2,7 +2,7 @@ import { useDispatch } from "react-redux";
 import { useTypedSelector } from "../store";
 import { useEffect, useRef, useState } from "react";
 import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../reducers/channel-reducer";
-import CreateCourseDialog from './CreateCourseDialog'
+import CreateCourseDialog from './Dialogs/CreateCourseDialog'
 import { GetSelectedPostActionActionCreator } from "../reducers/posts-reducer";
 import { Channel } from "../types";
 const Courses: React.FC = () => {

@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI } from '../types';
 
 
 const baseURL ='http://localhost:8080/';
@@ -74,6 +74,21 @@ async function DeleteChannel(id: string)   {
     }
 };
 
+async function DeletePost(id: string)   { 
+    try
+    {
+        await instance.delete(`posts/${id}`,  {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }
+    })
+    }
+    catch(e)
+    {
+        return e
+    }
+};
+
 async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string)   { 
     try
     {
@@ -133,6 +148,23 @@ async function GetPost(postId: string)   {
     
 };
 
+async function GetChannelUsers(channelId: string)   { 
+    try 
+    {
+        const { data, status } = await instance.get<MaxChannelInfoAPI>(`channel/${channelId}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+        return data.users
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+};
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -141,4 +173,6 @@ export const api = {
     CreatePost: CreatePost,
     GetPosts: GetPosts,
     GetPost: GetPost,
+    DeletePost: DeletePost,
+    GetChannelUsers: GetChannelUsers,
 }

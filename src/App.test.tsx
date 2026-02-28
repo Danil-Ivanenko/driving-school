@@ -2,11 +2,46 @@ import React from 'react';
 
 import { render, screen, fireEvent   } from '@testing-library/react';
 import LoginPage from './pages/loginPage';
-import CreateCourseDialog from './Components/CreateCourseDialog'
+import CreateCourseDialog from './Components/Dialogs/CreateCourseDialog'
 import { Provider } from 'react-redux';
 import store from './store' 
-import DeleteChannel from './Components/DeleteChannel';
-import CreatePostDialog from './Components/CreatePostDialog';
+import DeleteChannel from './Components/Dialogs/DeleteChannelDialog';
+import CreatePostDialog from './Components/Dialogs/CreatePostDialog';
+import DeletePostDialog from './Components/Dialogs/DeletePostDialog';
+
+describe('DeletePostDialog Component', () => {
+    const setup = () => {
+
+    render(
+      <Provider store={store}>
+        <DeletePostDialog />
+      </Provider>
+    );
+
+    const openButton = screen.getByRole('button',{ name: '-' });
+    
+    return { openButton };
+  };
+  
+  test('Открывается модальное окно', async () => {
+
+    const { openButton } = setup();
+    fireEvent.click(openButton);
+    expect(screen.getByText('Удалить пост?')).toBeInTheDocument();
+
+  });
+
+    test('Закрывается модальное окно', async () => {
+
+    const { openButton} = setup();
+    fireEvent.click(openButton);
+    const closeButton = screen.getByText('Отмена');
+
+    fireEvent.click(closeButton);
+    expect(screen.queryByText('Удалить пост?')).not.toBeInTheDocument();
+  });
+});
+
 
 describe('CreateCourseDialog Component', () => {
     const setup = () => {

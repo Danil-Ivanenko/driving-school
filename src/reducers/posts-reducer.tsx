@@ -53,6 +53,15 @@ export const GetPostsThunk =  (channelId: string) =>{
     }
 }
 
+export const DeletePostsThunk =  (postId: string) =>{
+    return async (dispatch: Dispatch<PostsActions>)  =>  {
+
+        await api.DeletePost(postId);
+        dispatch(GetSelectedPostActionActionCreator(null)); 
+    }
+}
+
+
 export const GetPostByIdThunk =  (postId: string) =>{
     return async (dispatch: Dispatch<PostsActions>)  =>  {
 

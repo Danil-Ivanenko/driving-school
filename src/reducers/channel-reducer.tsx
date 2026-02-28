@@ -1,5 +1,5 @@
 import { Dispatch } from "redux"
-import { Channel } from "../types";
+import { Channel, ChannelUser } from "../types";
 import { api } from "../API/api";
 
 
@@ -14,19 +14,28 @@ interface SetSelectedChannelAction {
     payload: Channel | null
 }
 
-export type ChannelActions = GetChannelsAction | SetSelectedChannelAction;
+interface GetSelectedChannelUsersAction {
+    type: typeof GET_SELECTED_CHANNEL_USERS,
+    payload: ChannelUser[]
+}
+
+
+export type ChannelActions = GetChannelsAction | SetSelectedChannelAction | GetSelectedChannelUsersAction;
 
 export const GET_CHANNELS = 'GET_CHANNELS'; 
 export const SET_SELECTED_CHANNEL = 'SET_SELECTED_CHANNEL'; 
+export const GET_SELECTED_CHANNEL_USERS = 'GET_SELECTED_CHANNEL_USERS';
 
 type ChannelState = {
     channels: Channel[],
-    selectedChannel: Channel | null
+    selectedChannel: Channel | null,
+    selectedChannelUsers: ChannelUser[]
 };
 
 const initialState: ChannelState = {
       channels: [],
-      selectedChannel: null
+      selectedChannel: null,
+      selectedChannelUsers : []
 };
 
 export const channelReducer = (
@@ -45,6 +54,11 @@ export const channelReducer = (
                 ...state,
                 selectedChannel: action.payload
             };
+        case GET_SELECTED_CHANNEL_USERS:
+            return {
+                ...state,
+                selectedChannelUsers : action.payload
+            }
         default:
             return state;
       }
@@ -58,7 +72,19 @@ export const GetChannelsThunk = () =>{
     }
 }
 
+export const GetUsersThunk = (channelId : string) =>{
+    return async (dispatch: Dispatch<ChannelActions>)  =>  {
 
+        const data = await api.GetChannelUsers(channelId);
+        dispatch(GetChannelUsersActionActionCreator(data as ChannelUser[])); 
+    }
+}
+
+
+ export const GetChannelUsersActionActionCreator = (channels: ChannelUser[]): GetSelectedChannelUsersAction => ({
+      type: GET_SELECTED_CHANNEL_USERS,
+      payload: channels
+});
 
 
 

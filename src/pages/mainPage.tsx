@@ -10,7 +10,24 @@ import { Dispatch } from 'redux';
 import Cources from '../Components/Courses'
 import ChannelInfo from '../Components/ChannelInfo'
 import PostInfo from '../Components/PostInfo';
+import DeleteChannel from '../Components/Dialogs/DeleteChannelDialog';
+import UsersChannelInfo from '../Components/UsersChannelInfo';
 const MainPage: React.FC = () => {
+    const [isCourseOpen, setCourseOpen] = useState<boolean>(true)
+    const [isUsersOpen, setUsersOpen] = useState<boolean>(false)
+    
+    const openCourse =  () =>{
+            setCourseOpen(true)
+            setUsersOpen(false)
+        }
+
+    const openUsers =  () =>{
+            setCourseOpen(false)
+            setUsersOpen(true)
+    }
+
+
+
     const channelState = useTypedSelector(state => state.channels); 
     const dispatch: any = useDispatch()
     const post = useTypedSelector(state => state.posts);
@@ -39,14 +56,38 @@ const MainPage: React.FC = () => {
             <div className='containerRow'>
 
                     <Cources/>
+                    <div className='containerCol' style={{ maxHeight: '100vh',   overflowY: 'auto'}}>
 
-                    {post.selectedPost == null ? (
-                            <ChannelInfo/> 
-                        ): (
-                            <PostInfo/>
-                        )
-                    }
+                    
+                        {channelState.selectedChannel != null && (
+                            <div className='simpleForm' style={{flexDirection :"row" ,justifyContent :"space-between"}}>
+                                <p className='headline'> {channelState.selectedChannel.name} </p>
+                                
+                                <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
+                                    <div className='course-block' style={ isCourseOpen ? {backgroundColor: "#b5d7ed"} : {}} onClick={openCourse}> Курс</div>
+                                    <div className='course-block' style={ isUsersOpen ? {backgroundColor: "#b5d7ed"} : {}} onClick={openUsers}>  Пользователи</div>
+                                    
+                                    <DeleteChannel/>
+                                </div>
+                                
+                            </div>
+                        )}
+                    
+                        {isCourseOpen && (
 
+                            post.selectedPost == null ? (
+                                <ChannelInfo/> 
+                            ): (
+                                <PostInfo/>
+                            )
+                        
+                        )}
+                        
+                        {isUsersOpen && (
+                            <UsersChannelInfo/>
+                        )}
+
+                    </div>
 
 
             </div>

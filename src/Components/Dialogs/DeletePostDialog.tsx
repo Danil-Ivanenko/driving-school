@@ -1,18 +1,18 @@
 import { useDispatch } from "react-redux";
-import { useTypedSelector } from "../store";
+import { useTypedSelector } from "../../store";
 import { useEffect, useRef, useState } from "react";
-import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../reducers/channel-reducer";
-import styles from '../css/login.module.css'
-import { api } from "../API/api";
-const DeleteChannel: React.FC = ()  => {
+import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducers/channel-reducer";
+import styles from '../../css/login.module.css'
+import { api } from "../../API/api";
+import { DeletePostsThunk } from "../../reducers/posts-reducer";
+const DeletePostDialog: React.FC = ()  => {
     const [isOpen, setOpen] = useState<boolean>(false);
     const dispatch: any = useDispatch()
-    const selectedChannel = useTypedSelector(state => state.channels.selectedChannel); 
+    const selectedPost = useTypedSelector(state => state.posts.selectedPost); 
     
     const DeleteChannel = async () =>{
-            await api.DeleteChannel(selectedChannel!.id)
+            dispatch(DeletePostsThunk(selectedPost!.id))
             setOpen(false)
-            dispatch(GetChannelsThunk())
         }
 
     
@@ -28,7 +28,7 @@ const DeleteChannel: React.FC = ()  => {
             {isOpen && (
                 <div className="modalOverlay" >
                     <dialog  className='centerpointModal'   >  
-                        <p  style={{fontSize :"20px", margin :"0px"}} >Удалить курс?</p>
+                        <p  style={{fontSize :"20px", margin :"0px"}} >Удалить пост?</p>
                         
         
                         <div style={{display : "flex", justifyContent : "flex-end", gap :"5px"}} >
@@ -51,4 +51,4 @@ const DeleteChannel: React.FC = ()  => {
     );
 }
 
-export default DeleteChannel;
+export default DeletePostDialog;

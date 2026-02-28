@@ -34,6 +34,20 @@ export type Post = {
     deadline: string,
     authorId: number
 }
+export type ChannelUser ={
+    id : number,
+    name : string,
+    surname : string
+    email : string
+}
+
+export type MaxChannelInfoAPI ={
+    id: string,
+    name: string,
+    description: string,
+    image: string,
+    users : ChannelUser[]
+}
 
 export const PostTypeTranslations: Record<PostType, string> = {
     [PostType.TASK]: "Задача",

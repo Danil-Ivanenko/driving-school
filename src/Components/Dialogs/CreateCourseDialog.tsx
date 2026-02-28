@@ -1,9 +1,9 @@
 import { useDispatch } from "react-redux";
-import { useTypedSelector } from "../store";
+import { useTypedSelector } from "../../store";
 import { useEffect, useRef, useState } from "react";
-import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../reducers/channel-reducer";
-import styles from '../css/login.module.css'
-import { api } from "../API/api";
+import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducers/channel-reducer";
+import styles from '../../css/login.module.css'
+import { api } from "../../API/api";
 const CreateCourseDialog: React.FC = () => {
     const [isOpen, setOpen] = useState<boolean>(false);
     const [newCorseName, setNewCorseName] = useState<string>('');

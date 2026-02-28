@@ -1,11 +1,11 @@
 import { useDispatch } from "react-redux";
-import { useTypedSelector } from "../store";
+import { useTypedSelector } from "../../store";
 import { useEffect, useRef, useState } from "react";
-import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../reducers/channel-reducer";
-import styles from '../css/login.module.css'
-import { api } from "../API/api";
-import { PostType } from "../types";
-import { GetPostsThunk } from "../reducers/posts-reducer";
+import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducers/channel-reducer";
+import styles from '../../css/login.module.css'
+import { api } from "../../API/api";
+import { PostType } from "../../types";
+import { GetPostsThunk } from "../../reducers/posts-reducer";
 
 const CreatePostDialog: React.FC = ()  => {
     const [isOpen, setOpen] = useState<boolean>(false);
