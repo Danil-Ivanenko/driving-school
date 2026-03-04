@@ -21,7 +21,11 @@ const LoginPage: React.FC = () => {
         }
         else if(data as tokenResponse)
         {
-            localStorage.setItem('token', (data as tokenResponse).token);
+            const token = data as tokenResponse
+            localStorage.setItem('token',token.token);
+            const roles = getUserRolesFromToken(token.token);
+            
+            localStorage.setItem('userRoles', JSON.stringify(roles));
             window.location.href = '/main'
         }
 
@@ -36,7 +40,15 @@ const LoginPage: React.FC = () => {
         setPassword(event.target.value); 
         setError('');
     };
-    
+
+    function getUserRolesFromToken(token: string): string[] {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.role || [];
+        } catch {
+            return [];
+        }
+    }
 
     return (
         <div className={styles.App}>

@@ -17,23 +17,42 @@ export type Channel = {
 
 export enum PostType{
     TASK = "TASK",  
-    NEWS = "NEWS",
-    LECTURE = "LECTURE"
+    NEWS = "NEWS"
 }
 
 export type PostShort ={
     id: string,
     label: string,
-    type: PostType
+    type: PostType,
+    authorName: string
 }
 export type Post = {
     id: string,
     label: string,
     text: string,
     type: PostType,
-    deadline: string,
-    authorId: number
+    deadline?: string,
+    authorName: string,
+    studentSolution? : StudentSolution
 }
+
+export type StudentSolution = {
+    id: string;
+    studentId: number;   
+    studentName: string;
+    taskId: string;       
+    taskLabel: string;
+    teacherId: number;    
+    teacherName: string;
+    text: string;
+    fileUrl: string;
+    fileName: string;
+    mark: number;     
+    submittedAt: string;  
+    updatedAt: string;   
+    markedAt: string;   
+}
+
 export type ChannelUser ={
     id : number,
     name : string,
@@ -51,6 +70,5 @@ export type MaxChannelInfoAPI ={
 
 export const PostTypeTranslations: Record<PostType, string> = {
     [PostType.TASK]: "Задача",
-    [PostType.NEWS]: "Новость",
-    [PostType.LECTURE]: "Лекция"
+    [PostType.NEWS]: "Новость"
 };

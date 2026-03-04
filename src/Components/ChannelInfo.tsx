@@ -6,17 +6,18 @@ import DeleteChannel from './Dialogs/DeleteChannelDialog'
 import CreatePostDialog from "./Dialogs/CreatePostDialog";
 import { GetPostByIdThunk, GetPostsThunk, GetSelectedPostActionActionCreator } from "../reducers/posts-reducer";
 import { PostTypeTranslations } from "../types";
+import { hasAnyRole, MANAGER, TEACHER } from "../RoleChecker";
 const ChannelInfo: React.FC = () => {
     const channelState = useTypedSelector(state => state.channels); 
     const postsState = useTypedSelector(state => state.posts);
     const dispatch: any = useDispatch()
+    
     useEffect(() => {
         if(channelState.selectedChannel?.id != null)
         {
             dispatch(GetPostsThunk(channelState.selectedChannel!.id))
         }
-        
-    }, [channelState.selectedChannel])
+    }, [channelState.selectedChannel?.id])
     
     const handlePostClick = async (postId : string) =>{
         dispatch(GetPostByIdThunk(postId))
@@ -26,10 +27,12 @@ const ChannelInfo: React.FC = () => {
 
             
         <>
+            {hasAnyRole([MANAGER, TEACHER]) && (
+                <div className='simpleForm' >
+                    < CreatePostDialog/>
+                </div>
+            )}
 
-            <div className='simpleForm' >
-                < CreatePostDialog/>
-            </div>
             
             <>
                 {postsState.posts.map((post) => (

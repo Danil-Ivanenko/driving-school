@@ -10,6 +10,7 @@ import { Dispatch } from 'redux';
 import Cources from './Courses'
 import ChannelInfo from './ChannelInfo'
 import DeletePostDialog from './Dialogs/DeletePostDialog';
+import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../RoleChecker';
 const PostInfo: React.FC = () => {
     const postState = useTypedSelector(state => state.posts.selectedPost!); 
     const dispatch: any = useDispatch()
@@ -29,14 +30,17 @@ const PostInfo: React.FC = () => {
                 <div className='simpleForm' style={{ justifyContent :"space-between"}} >
                     <div style={{display: "flex",justifyContent : "space-between",  gap:"5px", alignItems: "center"}}>
                         <p className='headline'>{PostTypeTranslations[postState.type]}: {postState.label} </p>
-                        <DeletePostDialog/>
+                        {hasAnyRole([MANAGER,TEACHER]) && <DeletePostDialog/> }
                     </div>
-
-                    <p className='baseP'>Сдать до {postState.deadline}</p>
+                    {postState.deadline != null && (
+                        <p className='baseP'>Сдать до {postState.deadline}</p>
+                    )}
+                    
 
                     <p> {postState.text}</p>
 
-
+                    <hr className="hr" />
+                    <p style={{margin: "0px"}}> Комментарии: _</p>
                 </div>
 
 

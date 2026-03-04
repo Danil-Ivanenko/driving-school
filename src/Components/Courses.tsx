@@ -5,6 +5,7 @@ import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../reducers/c
 import CreateCourseDialog from './Dialogs/CreateCourseDialog'
 import { GetSelectedPostActionActionCreator } from "../reducers/posts-reducer";
 import { Channel } from "../types";
+import { hasAnyRole, MANAGER, TEACHER } from "../RoleChecker";
 const Courses: React.FC = () => {
     const channelState = useTypedSelector(state => state.channels); 
     const postState = useTypedSelector(state => state.posts)
@@ -17,11 +18,7 @@ const Courses: React.FC = () => {
     
     const handleChannelClick =  (channel : Channel) =>{
         dispatch(GetSelectedPostActionActionCreator(null)) 
-        if(postState.selectedPost == null)  //из-за того что state не успел обновиться клик по любому каналу вернет пользователю предыдущий канал
-        {
-            dispatch(SetSelectedChannelActionCreator(channel))
-        }
-        
+        dispatch(SetSelectedChannelActionCreator(channel))
     }
     
 
@@ -32,8 +29,8 @@ const Courses: React.FC = () => {
                 
                 <div style={{display : "flex", justifyContent : "space-between"}}>
                     <p style={{display: "grid", placeItems : "center", fontSize:"22x",margin : "0px"}}>Курсы</p>
-
-                    <CreateCourseDialog/>
+                    {hasAnyRole([MANAGER, TEACHER]) && ( <CreateCourseDialog/>)}
+                   
                 </div>
                 
                 <>

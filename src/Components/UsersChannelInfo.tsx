@@ -14,7 +14,7 @@ const UsersChannelInfo: React.FC = () => {
 
     useEffect(() => {
         dispatch(GetUsersThunk(channelId))
-    }, [])
+    }, [channelId])
 
 
 

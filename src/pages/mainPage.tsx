@@ -12,6 +12,7 @@ import ChannelInfo from '../Components/ChannelInfo'
 import PostInfo from '../Components/PostInfo';
 import DeleteChannel from '../Components/Dialogs/DeleteChannelDialog';
 import UsersChannelInfo from '../Components/UsersChannelInfo';
+import { hasAnyRole, MANAGER, TEACHER } from '../RoleChecker';
 const MainPage: React.FC = () => {
     const [isCourseOpen, setCourseOpen] = useState<boolean>(true)
     const [isUsersOpen, setUsersOpen] = useState<boolean>(false)
@@ -43,9 +44,13 @@ const MainPage: React.FC = () => {
         
         <header className='header'>
            <p className='mainName'> Автошкола</p>
-           <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
-                <div className='course-block'> Пользователи</div>
-           </div>
+           
+           {hasAnyRole([MANAGER, TEACHER]) && (
+                <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
+                    <div className='course-block'> Пользователи</div>
+            </div>
+           )}
+
         </header>
         
 
@@ -63,12 +68,15 @@ const MainPage: React.FC = () => {
                             <div className='simpleForm' style={{flexDirection :"row" ,justifyContent :"space-between"}}>
                                 <p className='headline'> {channelState.selectedChannel.name} </p>
                                 
+                                {hasAnyRole([MANAGER, TEACHER]) && (
                                 <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
                                     <div className='course-block' style={ isCourseOpen ? {backgroundColor: "#b5d7ed"} : {}} onClick={openCourse}> Курс</div>
                                     <div className='course-block' style={ isUsersOpen ? {backgroundColor: "#b5d7ed"} : {}} onClick={openUsers}>  Пользователи</div>
                                     
                                     <DeleteChannel/>
                                 </div>
+                                )}
+
                                 
                             </div>
                         )}

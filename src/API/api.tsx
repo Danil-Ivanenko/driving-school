@@ -77,7 +77,7 @@ async function DeleteChannel(id: string)   {
 async function DeletePost(id: string)   { 
     try
     {
-        await instance.delete(`posts/${id}`,  {
+        await instance.delete(`api/posts/${id}`,  {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}` 
         }
@@ -92,13 +92,12 @@ async function DeletePost(id: string)   {
 async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string)   { 
     try
     {
-        await instance.post(`posts`,
+        await instance.post(`api/posts`,
         {
             label: label,
             text: text,
             type: type,
             deadline: deadline,
-            authorId : 1, //переделать
             needMark: type == PostType.TASK ? true : false,
             channelId: channelId
         }, 
@@ -118,7 +117,7 @@ async function CreatePost(label: string, text: string, type : string, deadline: 
 async function GetPosts(channelId: string)   { 
     try 
     {
-        const { data, status } = await instance.get<PostShort[]>(`posts/channel/${channelId}`, {
+        const { data, status } = await instance.get<PostShort[]>(`api/posts/channel/${channelId}`, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}` 
         }});
@@ -134,7 +133,7 @@ async function GetPosts(channelId: string)   {
 async function GetPost(postId: string)   { 
     try 
     {
-        const { data, status } = await instance.get<Post>(`posts/${postId}`, {
+        const { data, status } = await instance.get<Post>(`api/posts/${postId}`, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}` 
         }});

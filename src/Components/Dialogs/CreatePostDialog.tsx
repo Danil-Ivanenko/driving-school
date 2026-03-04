@@ -66,7 +66,6 @@ const CreatePostDialog: React.FC = ()  => {
                             <select value={postType} onChange={handlePostTypeChange}>
                                 <option value={PostType.NEWS}>Новость</option>
                                 <option value={PostType.TASK}>Задача</option>
-                                <option value={PostType.LECTURE}>Лекция</option>
                             </select>
                         </div>
                         <div>
