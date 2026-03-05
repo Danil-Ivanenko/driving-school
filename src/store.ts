@@ -5,11 +5,13 @@ import  channelReducerc  from './reducers/channel-reducer';
 import { TypedUseSelectorHook } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { postsReducer } from './reducers/posts-reducer';
+import { userReducer } from './reducers/user-reducer';
 
 
 const rootReducer = combineReducers({
     channels: channelReducerc,
-    posts: postsReducer
+    posts: postsReducer,
+    users: userReducer
 });
 export type RootState = ReturnType<typeof rootReducer>
 export const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector

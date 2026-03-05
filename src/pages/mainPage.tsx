@@ -12,6 +12,7 @@ import ChannelInfo from '../Components/ChannelInfo'
 import PostInfo from '../Components/PostInfo';
 import DeleteChannel from '../Components/Dialogs/DeleteChannelDialog';
 import UsersChannelInfo from '../Components/UsersChannelInfo';
+import UsersList from '../Components/UserList';
 import { hasAnyRole, MANAGER, TEACHER } from '../RoleChecker';
 const MainPage: React.FC = () => {
     const [isCourseOpen, setCourseOpen] = useState<boolean>(true)
@@ -47,7 +48,13 @@ const MainPage: React.FC = () => {
            
            {hasAnyRole([MANAGER, TEACHER]) && (
                 <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
-                    <div className='course-block'> Пользователи</div>
+                <div 
+                    className='course-block' 
+                    onClick={openUsers}
+                    style={{ cursor: 'pointer' }}
+                >
+                    Пользователи
+                </div>
             </div>
            )}
 
@@ -92,7 +99,8 @@ const MainPage: React.FC = () => {
                         )}
                         
                         {isUsersOpen && (
-                            <UsersChannelInfo/>
+                            // <UsersChannelInfo/>
+                            <UsersList />
                         )}
 
                     </div>
