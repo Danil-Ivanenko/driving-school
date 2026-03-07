@@ -1,21 +1,28 @@
 import { Dispatch } from "redux";
-import { Post, PostShort, PostType } from "../types"
+import { Post, PostShort, PostType, StudentSolution } from "../types"
 import { api } from "../API/api";
 
 
 type PostsState = {
     posts: PostShort[]
     selectedPost: Post | null
+    solutions: StudentSolution[]
 }
 
 const initialState: PostsState ={
     posts: [],
-    selectedPost: null
+    selectedPost: null,
+    solutions: []
 }
-export type PostsActions = GetPostsAction | GetSelectedPostAction;
+export type PostsActions = GetPostsAction | GetSelectedPostAction | GetSolutionsAction;
 export const GET_POSTS = 'GET_POSTS'; 
 export const GET_SELECTED_POST = 'GET_SELECTED_POST'; 
+export const GET_SOLUTIONS = 'GET_SOLUTIONS'; 
 
+interface GetSolutionsAction {
+    type: typeof GET_SOLUTIONS,
+    payload: StudentSolution[]
+}
 interface GetPostsAction {
     type: typeof GET_POSTS,
     payload: PostShort[]
@@ -40,6 +47,11 @@ export const postsReducer = (
             ...state,
             selectedPost : action.payload,
         };
+    case GET_SOLUTIONS:
+        return {
+          ...state,
+          solutions : action.payload  
+        };
     default:
         return state;
     }
@@ -61,7 +73,6 @@ export const DeletePostsThunk =  (postId: string) =>{
     }
 }
 
-
 export const GetPostByIdThunk =  (postId: string) =>{
     return async (dispatch: Dispatch<PostsActions>)  =>  {
 
@@ -70,10 +81,24 @@ export const GetPostByIdThunk =  (postId: string) =>{
     }
 }
 
+export const GetSolutionsByPostIdThunk =  (postId: string) =>{
+    return async (dispatch: Dispatch<PostsActions>)  =>  {
+
+        const data = await api.GetPostSolutions(postId);
+        dispatch(GetSolutionsActionCreator(data as StudentSolution[])); 
+    }
+}
+
 export const GetSelectedPostActionActionCreator = (post: Post | null): GetSelectedPostAction => ({
       type: GET_SELECTED_POST,
       payload: post
 });
+
+export const GetSolutionsActionCreator = (solutions: StudentSolution[]): GetSolutionsAction => ({
+      type: GET_SOLUTIONS,
+      payload: solutions
+});
+
 
 export const GetPostsActionActionCreator = (posts: PostShort[]): GetPostsAction => ({
       type: GET_POSTS,

@@ -33,6 +33,8 @@ export type Post = {
     type: PostType,
     deadline?: string,
     authorName: string,
+    fileUrl? : string,
+    fileName? : string
     studentSolution? : StudentSolution
 }
 
@@ -45,8 +47,8 @@ export type StudentSolution = {
     teacherId: number;    
     teacherName: string;
     text: string;
-    fileUrl: string;
-    fileName: string;
+    fileUrl?: string;
+    fileName?: string;
     mark: number;     
     submittedAt: string;  
     updatedAt: string;   
@@ -67,6 +69,17 @@ export type MaxChannelInfoAPI ={
     image: string,
     users : ChannelUser[]
 }
+
+export type UserProfile ={
+    id: number,
+    firstName: string,
+    lastName: string,
+    phone: string,
+    email: string,
+    role: string[],
+    isActive: boolean
+}
+
 
 export const PostTypeTranslations: Record<PostType, string> = {
     [PostType.TASK]: "Задача",

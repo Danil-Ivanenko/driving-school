@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { useTypedSelector } from "../../store";
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducers/channel-reducer";
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
@@ -13,6 +13,7 @@ const CreatePostDialog: React.FC = ()  => {
     const [postText, setPostText] = useState<string>('');
     const [postType, setPostType] = useState<PostType>(PostType.NEWS);
     const [postDeadline, setPostDeadline] = useState<string>('');
+    const [file, setFile] = useState<File| null>(null);
 
     const handlePostNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPostName(event.target.value); 
@@ -30,21 +31,34 @@ const CreatePostDialog: React.FC = ()  => {
     const handlePostDeadlineChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPostDeadline(event.target.value); 
     };
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) 
+        {
+            setFile(files[0]);
+        } 
+        else 
+        {
+            setFile(null);
+        }
+    };
 
     const dispatch: any = useDispatch()
     const selectedChannel = useTypedSelector(state => state.channels.selectedChannel);
 
     const CreatePost = async () =>{
-        await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id)
+        await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file)
         setOpen(false)
         setPostName('')
         setPostText('')
         setPostDeadline('')
+        setFile(null);
         dispatch(GetPostsThunk(selectedChannel!.id))
     }
 
     return(
         <>
+        <div className='simpleForm' >
              <div className='course-block' onClick={() => setOpen(true)}> Создать запись</div>
             {isOpen && (
                 <div className="modalOverlay" >
@@ -72,6 +86,11 @@ const CreatePostDialog: React.FC = ()  => {
                             <label htmlFor="post-deadline" >Срок </label>
                             <input id="post-deadline" type='datetime-local' value={postDeadline}  onChange={handlePostDeadlineChange}/>
                         </div>
+                        
+                        <div>                    
+                            <input type="file" multiple={false} onChange={handleFileChange}  />
+                            
+                        </div>
         
                         <div style={{display : "flex", justifyContent : "flex-end", gap :"5px"}} >
                             <button className={styles.button} type="button" onClick={CreatePost} >
@@ -87,7 +106,7 @@ const CreatePostDialog: React.FC = ()  => {
                 </div>
             )}
         
-            
+            </div>
         </>
         
     );

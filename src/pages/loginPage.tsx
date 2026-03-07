@@ -62,7 +62,7 @@ const LoginPage: React.FC = () => {
 
                         <div >
                             <label htmlFor="password-input">  &nbsp; Пароль:</label>
-                            <input id="password-input" value={password} onChange={handlePasswordChange}/>
+                            <input id="password-input" type='password' value={password} onChange={handlePasswordChange}/>
                         </div>
 
                         <button className={styles.button} type="submit">

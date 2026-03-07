@@ -22,15 +22,19 @@ const ChannelInfo: React.FC = () => {
     const handlePostClick = async (postId : string) =>{
         dispatch(GetPostByIdThunk(postId))
     }
+    if(channelState.selectedChannel?.id == null)
+    {
+        return null;
+    }
 
     return(
 
             
         <>
             {hasAnyRole([MANAGER, TEACHER]) && (
-                <div className='simpleForm' >
+                
                     < CreatePostDialog/>
-                </div>
+                
             )}
 
             

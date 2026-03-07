@@ -5,6 +5,7 @@ import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
 import { api } from '../API/api';
 import {GetChannelsThunk, GetUsersThunk, SetSelectedChannelActionCreator} from '../reducers/channel-reducer'
+import AddUserToChannelDialog from './Dialogs/AddUserToChannelDialog';
 
 
 const UsersChannelInfo: React.FC = () => {
@@ -21,6 +22,7 @@ const UsersChannelInfo: React.FC = () => {
     return (
         
         <>
+            <AddUserToChannelDialog/>
             {channelUsers.map((user) => (
                 <div key={user.id} className='simpleForm' style={{cursor : "pointer"}} >
                     <p className='headline'> {user.email} </p>
