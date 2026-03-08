@@ -24,8 +24,10 @@ const LoginPage: React.FC = () => {
             const token = data as tokenResponse
             localStorage.setItem('token',token.token);
             const roles = getUserRolesFromToken(token.token);
-            
+            const id = getUserIdFromToken(token.token)
+
             localStorage.setItem('userRoles', JSON.stringify(roles));
+            localStorage.setItem('id', id);
             window.location.href = '/main'
         }
 
@@ -47,6 +49,15 @@ const LoginPage: React.FC = () => {
             return payload.role || [];
         } catch {
             return [];
+        }
+    }
+    
+    function getUserIdFromToken(token: string)  {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.sub ;
+        } catch {
+            return ""
         }
     }
 

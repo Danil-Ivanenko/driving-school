@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, UserProfile, StudentSolution } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, UserProfile, StudentSolution, CommentDTO } from '../types';
 
 
 const baseURL ='http://localhost:8080/';
@@ -319,7 +319,74 @@ async function OrderSolution(solutionId : string, mark : number)   {
 };
 
 
+async function GetCommentsOfPost(postId : string)   { 
+    try 
+    {
+        const { data, status } = await instance.get< CommentDTO[]>(`comment/post/${postId}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+        return data
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+    
+};
 
+async function SendComment(postId : string, text : string)   { 
+    try 
+    {
+        await instance.post(`comment/post/${postId}`, {text : text},{
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+    
+};
+
+async function ChangeComment(commentId : number, text : string)   { 
+    try 
+    {
+        await instance.put(`comment/comment/${commentId}`,   {text },{
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+    
+};
+
+async function DeleteComment(commentId : number)   { 
+    try 
+    {
+        await instance.delete(`comment/${commentId}`,{
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+    
+};
 
 export const api = {
     login : login,
@@ -338,5 +405,9 @@ export const api = {
     AddUserToChannel : AddUserToChannel,
     GetMyProfile : GetMyProfile,
     GetPostSolutions : GetPostSolutions,
-    OrderSolution : OrderSolution
+    OrderSolution : OrderSolution,
+    GetCommentsOfPost : GetCommentsOfPost,
+    SendComment : SendComment,
+    ChangeComment : ChangeComment, 
+    DeleteComment : DeleteComment
 }

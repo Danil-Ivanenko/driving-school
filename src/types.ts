@@ -24,7 +24,8 @@ export type PostShort ={
     id: string,
     label: string,
     type: PostType,
-    authorName: string
+    authorName: string,
+    totalComments : number
 }
 export type Post = {
     id: string,
@@ -79,6 +80,28 @@ export type UserProfile ={
     role: string[],
     isActive: boolean
 }
+
+export type UserInfoInComment = {
+    id: number,
+    firstName: string,
+    lastName: string,
+    age: number,
+    phone: string,
+    email: string,
+    role: string[],
+    isActive: boolean
+}
+// export type Instant = {
+//     epochSeconds : number,
+//     nanosecondsOfSecond : number
+// }
+
+export type CommentDTO ={
+    id: number,
+    text: string,
+    authorDto: UserInfoInComment
+}
+
 
 
 export const PostTypeTranslations: Record<PostType, string> = {

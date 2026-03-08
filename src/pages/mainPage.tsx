@@ -42,6 +42,7 @@ const MainPage: React.FC = () => {
     const signOut = () => {
         localStorage.removeItem('token')
         localStorage.removeItem('userRoles')
+        localStorage.removeItem('id')
         window.location.href = "/login"
     };
 
