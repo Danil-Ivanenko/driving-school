@@ -12,7 +12,7 @@ import myProfileReducer from './reducers/myProfile-reducer';
 const rootReducer = combineReducers({
     channels: channelReducerc,
     posts: postsReducer,
-    users: userReducer
+    users: userReducer,
     myProfile : myProfileReducer
 });
 export type RootState = ReturnType<typeof rootReducer>

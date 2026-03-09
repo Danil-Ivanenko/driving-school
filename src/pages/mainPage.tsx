@@ -54,22 +54,21 @@ const MainPage: React.FC = () => {
         <header className='header'>
            <p className='mainName'> Автошкола</p>
            
-           {hasAnyRole([MANAGER, TEACHER]) && (
-                <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
+
+            <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
+                {hasAnyRole([MANAGER, TEACHER]) && (
                 <div 
                     className='course-block' 
                     onClick={openUsers}
                     style={{ cursor: 'pointer' }}
                 >
                     Пользователи
-                </div>
-           
-            <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
-                {hasAnyRole([MANAGER, TEACHER]) && (<div className='course-block'> Пользователи</div>)}
-                <div onClick={signOut} className='course-block'> {myProfile.profile?.lastName} { myProfile.profile?.firstName } ↩</div>
-            </div>
-           
+                </div> ) }
 
+                <div onClick={signOut} className='course-block'> {myProfile.profile?.lastName} { myProfile.profile?.firstName } ↩</div>
+           </div>
+
+           
         </header>
 
         

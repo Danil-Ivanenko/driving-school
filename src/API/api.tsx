@@ -1,7 +1,8 @@
 import axios, {AxiosError} from 'axios';
 import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, UserProfile, StudentSolution, CommentDTO } from '../types';
+import { UserProfile, StudentSolution, CommentDTO } from '../types';
+
 
 
 const baseURL ='http://localhost:8080/';
