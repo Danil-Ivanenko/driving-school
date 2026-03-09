@@ -9,6 +9,80 @@ import DeleteChannel from './Components/Dialogs/DeleteChannelDialog';
 import CreatePostDialog from './Components/Dialogs/CreatePostDialog';
 import DeletePostDialog from './Components/Dialogs/DeletePostDialog';
 import CreateUserDialog from './Components/Dialogs/CreateUserDialog';
+import AddUserToChannelDialog from './Components/Dialogs/AddUserToChannelDialog';
+import OrderSolutionDialog from './Components/Dialogs/OrderSolutionDialog';
+import SendTaskDialog from './Components/Dialogs/SendTaskDialog';
+
+
+
+describe('OrderSolutionDialog Component', () => {
+    const setup = () => {
+
+    render(
+      <Provider store={store}>
+        <OrderSolutionDialog solId={'1'}  />
+      </Provider>
+    );
+
+    const openButton = screen.getByText( 'Оценка:' );
+    
+    return { openButton };
+  };
+  
+  test('Открывается модальное окно', async () => {
+
+    const { openButton } = setup();
+    fireEvent.click(openButton);
+    expect(screen.getByText('Отмена')).toBeInTheDocument();
+
+  });
+
+    test('Закрывается модальное окно', async () => {
+
+    const { openButton} = setup();
+    fireEvent.click(openButton);
+    const closeButton = screen.getByText('Отмена');
+
+    fireEvent.click(closeButton);
+    expect(screen.queryByText('Отмена')).not.toBeInTheDocument();
+  });
+});
+
+
+
+describe('AddUserToChannelDialog Component', () => {
+    const setup = () => {
+
+    render(
+      <Provider store={store}>
+        <AddUserToChannelDialog />
+      </Provider>
+    );
+
+    const openButton = screen.getByText( 'Добавить пользователя' );
+    
+    return { openButton };
+  };
+  
+  test('Открывается модальное окно', async () => {
+
+    const { openButton } = setup();
+    fireEvent.click(openButton);
+    expect(screen.getByText('Отмена')).toBeInTheDocument();
+
+  });
+
+    test('Закрывается модальное окно', async () => {
+
+    const { openButton} = setup();
+    fireEvent.click(openButton);
+    const closeButton = screen.getByText('Отмена');
+
+    fireEvent.click(closeButton);
+    expect(screen.queryByText('Отмена')).not.toBeInTheDocument();
+  });
+});
+
 
 
 describe('DeletePostDialog Component', () => {

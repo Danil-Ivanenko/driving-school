@@ -24,8 +24,10 @@ const LoginPage: React.FC = () => {
             const token = data as tokenResponse
             localStorage.setItem('token',token.token);
             const roles = getUserRolesFromToken(token.token);
-            
+            const id = getUserIdFromToken(token.token)
+
             localStorage.setItem('userRoles', JSON.stringify(roles));
+            localStorage.setItem('id', id);
             window.location.href = '/main'
         }
 
@@ -49,6 +51,15 @@ const LoginPage: React.FC = () => {
             return [];
         }
     }
+    
+    function getUserIdFromToken(token: string)  {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.sub ;
+        } catch {
+            return ""
+        }
+    }
 
     return (
         <div className={styles.App}>
@@ -62,7 +73,7 @@ const LoginPage: React.FC = () => {
 
                         <div >
                             <label htmlFor="password-input">  &nbsp; Пароль:</label>
-                            <input id="password-input" value={password} onChange={handlePasswordChange}/>
+                            <input id="password-input" type='password' value={password} onChange={handlePasswordChange}/>
                         </div>
 
                         <button className={styles.button} type="submit">

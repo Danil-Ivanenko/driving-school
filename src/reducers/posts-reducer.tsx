@@ -1,21 +1,36 @@
 import { Dispatch } from "redux";
-import { Post, PostShort, PostType } from "../types"
+import { CommentDTO, Post, PostShort, PostType, StudentSolution } from "../types"
 import { api } from "../API/api";
 
 
 type PostsState = {
     posts: PostShort[]
     selectedPost: Post | null
+    solutions: StudentSolution[]
+    comments: CommentDTO[]
 }
 
 const initialState: PostsState ={
     posts: [],
-    selectedPost: null
+    selectedPost: null,
+    solutions: [],
+    comments : []
 }
-export type PostsActions = GetPostsAction | GetSelectedPostAction;
+export type PostsActions = GetPostsAction | GetSelectedPostAction | GetSolutionsAction | GetCommentsAction;
 export const GET_POSTS = 'GET_POSTS'; 
 export const GET_SELECTED_POST = 'GET_SELECTED_POST'; 
+export const GET_SOLUTIONS = 'GET_SOLUTIONS'; 
+export const GET_COMMENTS = 'GET_COMMENTS'; 
 
+interface GetCommentsAction {
+    type: typeof GET_COMMENTS,
+    payload: CommentDTO[]
+}
+
+interface GetSolutionsAction {
+    type: typeof GET_SOLUTIONS,
+    payload: StudentSolution[]
+}
 interface GetPostsAction {
     type: typeof GET_POSTS,
     payload: PostShort[]
@@ -40,6 +55,16 @@ export const postsReducer = (
             ...state,
             selectedPost : action.payload,
         };
+    case GET_SOLUTIONS:
+        return {
+          ...state,
+          solutions : action.payload  
+        };
+    case GET_COMMENTS:
+        return{
+            ...state,
+            comments : action.payload
+        }
     default:
         return state;
     }
@@ -61,7 +86,6 @@ export const DeletePostsThunk =  (postId: string) =>{
     }
 }
 
-
 export const GetPostByIdThunk =  (postId: string) =>{
     return async (dispatch: Dispatch<PostsActions>)  =>  {
 
@@ -70,14 +94,42 @@ export const GetPostByIdThunk =  (postId: string) =>{
     }
 }
 
+export const GetSolutionsByPostIdThunk =  (postId: string) =>{
+    return async (dispatch: Dispatch<PostsActions>)  =>  {
+
+        const data = await api.GetPostSolutions(postId);
+        dispatch(GetSolutionsActionCreator(data as StudentSolution[])); 
+    }
+}
+
+
+export const GetCommentsByPostIdThunk =  (postId: string) =>{
+    return async (dispatch: Dispatch<PostsActions>)  =>  {
+
+        const data = await api.GetCommentsOfPost(postId);
+        dispatch(GetCommentsActionActionCreator(data as CommentDTO[])); 
+    }
+}
+
 export const GetSelectedPostActionActionCreator = (post: Post | null): GetSelectedPostAction => ({
       type: GET_SELECTED_POST,
       payload: post
 });
 
+export const GetSolutionsActionCreator = (solutions: StudentSolution[]): GetSolutionsAction => ({
+      type: GET_SOLUTIONS,
+      payload: solutions
+});
+
+
 export const GetPostsActionActionCreator = (posts: PostShort[]): GetPostsAction => ({
       type: GET_POSTS,
       payload: posts
+});
+
+export const GetCommentsActionActionCreator = (comments: CommentDTO[]): GetCommentsAction => ({
+      type: GET_COMMENTS,
+      payload: comments
 });
 
 export default postsReducer;

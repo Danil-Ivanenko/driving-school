@@ -14,6 +14,7 @@ import DeleteChannel from '../Components/Dialogs/DeleteChannelDialog';
 import UsersChannelInfo from '../Components/UsersChannelInfo';
 import UsersList from '../Components/UserList';
 import { hasAnyRole, MANAGER, TEACHER } from '../RoleChecker';
+import { GetMyProfileThunk } from '../reducers/myProfile-reducer';
 const MainPage: React.FC = () => {
     const [isCourseOpen, setCourseOpen] = useState<boolean>(true)
     const [isUsersOpen, setUsersOpen] = useState<boolean>(false)
@@ -33,11 +34,18 @@ const MainPage: React.FC = () => {
     const channelState = useTypedSelector(state => state.channels); 
     const dispatch: any = useDispatch()
     const post = useTypedSelector(state => state.posts);
+    const myProfile = useTypedSelector(state => state.myProfile);
     useEffect(() => {
         dispatch(GetChannelsThunk())
+        dispatch(GetMyProfileThunk())
     }, [])
 
-
+    const signOut = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('userRoles')
+        localStorage.removeItem('id')
+        window.location.href = "/login"
+    };
 
     return (
         
@@ -55,11 +63,14 @@ const MainPage: React.FC = () => {
                 >
                     Пользователи
                 </div>
+           
+            <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
+                {hasAnyRole([MANAGER, TEACHER]) && (<div className='course-block'> Пользователи</div>)}
+                <div onClick={signOut} className='course-block'> {myProfile.profile?.lastName} { myProfile.profile?.firstName } ↩</div>
             </div>
-           )}
+           
 
         </header>
-        
 
         
 

@@ -22,15 +22,19 @@ const ChannelInfo: React.FC = () => {
     const handlePostClick = async (postId : string) =>{
         dispatch(GetPostByIdThunk(postId))
     }
+    if(channelState.selectedChannel?.id == null)
+    {
+        return null;
+    }
 
     return(
 
             
         <>
             {hasAnyRole([MANAGER, TEACHER]) && (
-                <div className='simpleForm' >
+                
                     < CreatePostDialog/>
-                </div>
+                
             )}
 
             
@@ -39,7 +43,7 @@ const ChannelInfo: React.FC = () => {
                     <div key={post.id} className='simpleForm' style={{cursor : "pointer"}} onClick={() => handlePostClick(post.id)} >
                         <p className='headline'> {PostTypeTranslations[post.type]}: {post.label}</p>
                         <hr className="hr" />
-                        <p style={{margin: "0px"}}> Комментарии: _</p>
+                        <p style={{margin: "0px"}}> Комментарии: {post.totalComments}</p>
                     </div>
                     ))}
             </>
