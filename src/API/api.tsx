@@ -1,4 +1,6 @@
 import axios, {AxiosError} from 'axios';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI } from '../types';
+import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, UserProfile, StudentSolution, CommentDTO } from '../types';
 
 
@@ -166,6 +168,166 @@ async function GetChannelUsers(channelId: string)   {
     
 };
 
+async function getAllUsers(): Promise<FullInfo[]> {
+    try {
+        const { data } = await instance.get<FullInfo[]>('users', {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch users:", e);
+        throw e;
+    }
+}
+
+
+async function getUserById(id: number): Promise<FullInfo> {
+    try {
+        const { data } = await instance.get<FullInfo>(`users/${id}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error(`Failed to fetch user ${id}:`, e);
+        throw e;
+    }
+}
+
+
+async function createUser(userData: CreateUser): Promise<FullInfo> {
+    try {
+        const { data } = await instance.post<FullInfo>('users', userData, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error("Failed to create user:", e);
+        throw e;
+    }
+}
+
+async function updateUser(id: number, userData: UpdateUser): Promise<FullInfo> {
+    try {
+        const { data } = await instance.put<FullInfo>(`users/${id}`, userData, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error(`Failed to update user ${id}:`, e);
+        throw e;
+    }
+}
+
+async function deleteUser(id: number): Promise<void> {
+    try {
+        await instance.delete(`users/${id}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+    } catch (e) {
+        console.error(`Failed to delete user ${id}:`, e);
+        throw e;
+    }
+}
+
+async function addRoleToUser(id: number, role: UserRole): Promise<FullInfo> {
+    try {
+        const { data } = await instance.post<FullInfo>(`users/${id}/add-role`, { role }, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error(`Failed to add role to user ${id}:`, e);
+        throw e;
+    }
+}
+
+async function removeRoleFromUser(id: number, role: UserRole): Promise<FullInfo> {
+    try {
+        const { data } = await instance.post<FullInfo>(`users/${id}/remove-role`, { role }, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error(`Failed to remove role from user ${id}:`, e);
+        throw e;
+    }
+}
+
+async function deactivateUser(id: number): Promise<FullInfo> {
+    try {
+        const { data } = await instance.patch<FullInfo>(`users/${id}/deactivate`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error(`Failed to deactivate user ${id}:`, e);
+        throw e;
+    }
+}
+
+async function activateUser(id: number): Promise<FullInfo> {
+    try {
+        const { data } = await instance.patch<FullInfo>(`users/${id}/activate`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error(`Failed to activate user ${id}:`, e);
+        throw e;
+    }
+}
+
+async function changePassword(oldPassword: string, newPassword: string): Promise<FullInfo> {
+    try {
+        const { data } = await instance.patch<FullInfo>('users/change-password', {
+            oldPassword,
+            newPassword
+        }, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error("Failed to change password:", e);
+        throw e;
+    }
+}
+
+async function getProfile(): Promise<FullInfo> {
+    try {
+        const { data } = await instance.get<FullInfo>('users/profile', {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch profile:", e);
+        throw e;
+    }
+}
+
+async function searchUsers(params: SearchParams): Promise<FullInfo[]> {
+    try {
+        const { data } = await instance.post<FullInfo[]>('users/search', params, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`  
+        }});
+        return data;
+    } catch (e) {
+        console.error("Failed to search users:", e);
+        throw e;
+    }
+}
 async function StudentSendTask(taskId: string, text: string, file : File | null)   { 
     try 
     {
@@ -398,6 +560,21 @@ export const api = {
     GetPost: GetPost,
     DeletePost: DeletePost,
     GetChannelUsers: GetChannelUsers,
+
+
+    getAllUsers: getAllUsers,
+    getUserById: getUserById,
+    createUser: createUser,
+    updateUser: updateUser,
+    deleteUser: deleteUser,
+    
+    addRoleToUser: addRoleToUser,
+    removeRoleFromUser: removeRoleFromUser,
+    deactivateUser: deactivateUser,
+    activateUser: activateUser,
+    getProfile: getProfile,
+    changePassword: changePassword,
+    searchUsers: searchUsers,
     StudentSendTask : StudentSendTask,
     StudentChangeTask : StudentChangeTask,
     StudentDeleteTask : StudentDeleteTask,

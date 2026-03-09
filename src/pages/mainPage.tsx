@@ -12,6 +12,7 @@ import ChannelInfo from '../Components/ChannelInfo'
 import PostInfo from '../Components/PostInfo';
 import DeleteChannel from '../Components/Dialogs/DeleteChannelDialog';
 import UsersChannelInfo from '../Components/UsersChannelInfo';
+import UsersList from '../Components/UserList';
 import { hasAnyRole, MANAGER, TEACHER } from '../RoleChecker';
 import { GetMyProfileThunk } from '../reducers/myProfile-reducer';
 const MainPage: React.FC = () => {
@@ -53,6 +54,15 @@ const MainPage: React.FC = () => {
         <header className='header'>
            <p className='mainName'> Автошкола</p>
            
+           {hasAnyRole([MANAGER, TEACHER]) && (
+                <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
+                <div 
+                    className='course-block' 
+                    onClick={openUsers}
+                    style={{ cursor: 'pointer' }}
+                >
+                    Пользователи
+                </div>
            
             <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
                 {hasAnyRole([MANAGER, TEACHER]) && (<div className='course-block'> Пользователи</div>)}
@@ -100,7 +110,8 @@ const MainPage: React.FC = () => {
                         )}
                         
                         {isUsersOpen && (
-                            <UsersChannelInfo/>
+                            // <UsersChannelInfo/>
+                            <UsersList />
                         )}
 
                     </div>

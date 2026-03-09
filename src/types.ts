@@ -108,3 +108,56 @@ export const PostTypeTranslations: Record<PostType, string> = {
     [PostType.TASK]: "Задача",
     [PostType.NEWS]: "Новость"
 };
+
+export type UserRole = 'STUDENT' | 'TEACHER' | 'MANAGER';
+
+export const ROLES = {
+    STUDENT: 'STUDENT' as UserRole,
+    TEACHER: 'TEACHER' as UserRole,
+    MANAGER: 'MANAGER' as UserRole
+};
+
+export interface FullInfo {
+    id: number;
+    firstName: string;
+    lastName: string;
+    age: number;
+    phone: string;
+    email: string;
+    role: UserRole[];
+    isActive: boolean;
+}
+
+export interface CreateUser {
+    firstName: string;
+    lastName: string;
+    age: number;
+    phone: string;
+    email: string;
+    password: string;
+    role: UserRole[];
+}
+
+export interface UpdateUser {
+    firstName: string;
+    lastName: string;
+    age: number;
+    phone: string;
+    email: string;
+    role: UserRole[];
+}
+
+export interface RoleOperation {
+    role: UserRole;
+}
+
+export interface ChangePassword {
+    oldPassword: string;
+    newPassword: string;
+}
+
+export interface SearchParams {
+    name?: string;
+    email?: string;
+    role?: UserRole;
+}
