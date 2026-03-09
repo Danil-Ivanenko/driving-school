@@ -12,9 +12,9 @@ import ChannelInfo from '../Components/ChannelInfo'
 import PostInfo from '../Components/PostInfo';
 import DeleteChannel from '../Components/Dialogs/DeleteChannelDialog';
 import UsersChannelInfo from '../Components/UsersChannelInfo';
-import UsersList from '../Components/UserList';
 import { hasAnyRole, MANAGER, TEACHER } from '../RoleChecker';
 import { GetMyProfileThunk } from '../reducers/myProfile-reducer';
+import HeaderComponent from '../Components/HeaderComponent';
 const MainPage: React.FC = () => {
     const [isCourseOpen, setCourseOpen] = useState<boolean>(true)
     const [isUsersOpen, setUsersOpen] = useState<boolean>(false)
@@ -25,51 +25,24 @@ const MainPage: React.FC = () => {
         }
 
     const openUsers =  () =>{
-            setCourseOpen(false)
-            setUsersOpen(true)
+        setCourseOpen(false)
+        setUsersOpen(true)
     }
-
-
 
     const channelState = useTypedSelector(state => state.channels); 
     const dispatch: any = useDispatch()
     const post = useTypedSelector(state => state.posts);
-    const myProfile = useTypedSelector(state => state.myProfile);
+
     useEffect(() => {
         dispatch(GetChannelsThunk())
-        dispatch(GetMyProfileThunk())
-    }, [])
 
-    const signOut = () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('userRoles')
-        localStorage.removeItem('id')
-        window.location.href = "/login"
-    };
+    }, [])
 
     return (
         
     <div className="app-container">
         
-        <header className='header'>
-           <p className='mainName'> Автошкола</p>
-           
-
-            <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px"}}>
-                {hasAnyRole([MANAGER, TEACHER]) && (
-                <div 
-                    className='course-block' 
-                    onClick={openUsers}
-                    style={{ cursor: 'pointer' }}
-                >
-                    Пользователи
-                </div> ) }
-
-                <div onClick={signOut} className='course-block'> {myProfile.profile?.lastName} { myProfile.profile?.firstName } ↩</div>
-           </div>
-
-           
-        </header>
+        <HeaderComponent />
 
         
 
@@ -109,8 +82,7 @@ const MainPage: React.FC = () => {
                         )}
                         
                         {isUsersOpen && (
-                            // <UsersChannelInfo/>
-                            <UsersList />
+                            <UsersChannelInfo/>
                         )}
 
                     </div>

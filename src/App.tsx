@@ -2,6 +2,7 @@ import './App.css';
 import { BrowserRouter, Routes, Route, Navigate  } from 'react-router';
 import LoginPage from './pages/loginPage'
 import MainPage from './pages/mainPage'
+import UsersPage from './pages/UsersPage'
 import './App.css';
 
 function App() {
@@ -11,16 +12,8 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="login" element={<LoginPage />} />
         <Route path='main'  element={< MainPage />} />
-        {/* <Route path='mapost:postIDin'  element={<  />} /> */}
-        
-        {/* 
-        <Route path='companies' element={<CompanyPages />}/>
-        <Route path='users' element={<UnapprovalUsersPage />}/>
-        <Route path="events" >
-              <Route index element={<EventsPage />} />   
-              <Route path=":eventId" element= { < DetailedEventPage/>} />
-        </Route> */}
-        
+        <Route path='users'  element={< UsersPage />} />
+
       </Routes>
     </BrowserRouter>
   );

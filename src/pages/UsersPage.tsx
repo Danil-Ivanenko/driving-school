@@ -5,11 +5,13 @@ import { FullInfo } from '../types';
 import type { ThunkDispatch } from 'redux-thunk';
 import type { AnyAction } from 'redux';
 import type { RootState } from '../store';
-import CreateUserDialog from './Dialogs/CreateUserDialog';
+import CreateUserDialog from '../Components/Dialogs/CreateUserDialog';
+import { hasAnyRole, MANAGER, TEACHER } from '../RoleChecker';
+import HeaderComponent from '../Components/HeaderComponent';
 
 type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;
 
-const UsersList: React.FC = () => {
+const UsersPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     
     const { users, loading, error } = useSelector((state: RootState) => state.users);
@@ -22,6 +24,9 @@ const UsersList: React.FC = () => {
     if (error) return <div style={{ padding: '20px' }}>Ошибка: {error}</div>;
 
     return (
+        <div className="app-container">
+            
+        <HeaderComponent />
         <div style={{ padding: '20px' }}>
             <div style={{
                 display: 'flex',
@@ -134,7 +139,8 @@ const UsersList: React.FC = () => {
                 ))}
             </div>
         </div>
+    </div>
     );
 };
 
-export default UsersList;
+export default UsersPage;
