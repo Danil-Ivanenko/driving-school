@@ -357,7 +357,7 @@ async function SendComment(postId : string, text : string)   {
 async function ChangeComment(commentId : number, text : string)   { 
     try 
     {
-        await instance.put(`comment/comment/${commentId}`,   {text },{
+        await instance.put(`comment/${commentId}`,   {text: text },{
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}` 
         }});
