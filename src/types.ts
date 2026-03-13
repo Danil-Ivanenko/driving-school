@@ -50,7 +50,7 @@ export type StudentSolution = {
     text: string;
     fileUrl?: string;
     fileName?: string;
-    mark: number;     
+    mark?: number;     
     submittedAt: string;  
     updatedAt: string;   
     markedAt: string;   

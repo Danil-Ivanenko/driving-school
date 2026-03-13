@@ -40,7 +40,7 @@ const PostInfo: React.FC = () => {
         }
 
     }
-
+    console.log(solutions)
 
     return (
         

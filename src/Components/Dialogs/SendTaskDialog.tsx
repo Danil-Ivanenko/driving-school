@@ -75,7 +75,7 @@ const SendTaskDialog: React.FC = () => {
     return(
         <>
             <button  className="course-block" onClick={() => setOpen(true)}>
-               {postState?.studentSolution == null ? "Ответ" : "Ваш ответ" }
+               {postState?.studentSolution == null ? "Ответ" : `Ваш ответ ${postState?.studentSolution?.mark || ""}` }
             </button>
 
             {isOpen && (
