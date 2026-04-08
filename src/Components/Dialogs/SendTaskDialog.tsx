@@ -106,14 +106,19 @@ const SendTaskDialog: React.FC = () => {
 
         
                         <div style={{display : "flex", justifyContent : "flex-end", gap :"5px"}} >
-                            <button className={styles.button} type="button" onClick={handleSaveFile} >
-                                Сохранить 
-                            </button>
+
                             
+                            {postState.studentSolution?.mark == null && (
+                                <button className={styles.button} type="button" onClick={handleSaveFile} >
+                                    Сохранить 
+                                </button>
+
+                            )}
+
                             <button className={styles.button} type="button" onClick={() => setOpen(false)} >
                                 Отмена
                             </button>
-                            {postState.studentSolution != null && (
+                            {postState.studentSolution != null && postState.studentSolution.mark == null && (
                                 <button className={styles.button} type="button" onClick={handleDeleteFile} >
                                     Удалить 
                                 </button>

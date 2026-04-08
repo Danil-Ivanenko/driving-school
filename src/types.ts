@@ -102,6 +102,26 @@ export type CommentDTO ={
     authorDto: UserInfoInComment
 }
 
+export enum CommandTeamType{
+    RANDOM = "TASK",  
+    DRAFT = "DRAFT",
+    FREE = "FREE"
+}
+
+export const CommandTeamTypeTranslations: Record<CommandTeamType, string> = {
+    [CommandTeamType.RANDOM]: "Случайно",
+    [CommandTeamType.DRAFT]: "Драфт",
+    [CommandTeamType.FREE]: "Свободно"
+};
+
+export enum CommandSolutionType{
+    FREE = "FREE",  
+    LAST = "LAST",
+    FIRST = "FIRST",
+    CAPITAN = "CAPITAN",  
+    DEMOCRATIC = "DEMOCRATIC",
+    QUALIFIED  = "QUALIFIED"
+}
 
 
 export const PostTypeTranslations: Record<PostType, string> = {

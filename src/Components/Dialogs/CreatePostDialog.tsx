@@ -58,8 +58,8 @@ const CreatePostDialog: React.FC = ()  => {
 
     return(
         <>
-        <div className='simpleForm' >
-             <div className='course-block' onClick={() => setOpen(true)}> Создать запись</div>
+
+             <div className='course-block' onClick={() => setOpen(true)}  style={{width : "90%"}}> Создать запись</div>
             {isOpen && (
                 <div className="modalOverlay" >
                     <dialog  className='centerpointModal'   >  
@@ -106,7 +106,7 @@ const CreatePostDialog: React.FC = ()  => {
                 </div>
             )}
         
-            </div>
+            
         </>
         
     );

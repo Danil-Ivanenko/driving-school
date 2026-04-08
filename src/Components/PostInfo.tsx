@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import '../css/mainPage.css'
+
 import styles from '../css/login.module.css'
 import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
@@ -52,7 +52,7 @@ const PostInfo: React.FC = () => {
                     <div style={{display: "flex",justifyContent : "space-between",  gap:"5px", alignItems: "center"}}>
                         <p className='headline'>{PostTypeTranslations[postState.type]}: {postState.label} </p>
                         <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
-                            {hasAnyRole([STUDENT]) && < SendTaskDialog/> }
+                            {hasAnyRole([STUDENT]) && postState.type == PostType.TASK &&  < SendTaskDialog/> }
                             {hasAnyRole([MANAGER,TEACHER]) && <DeletePostDialog/> }
                         </div>
                     </div>

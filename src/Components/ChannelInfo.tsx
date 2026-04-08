@@ -7,6 +7,7 @@ import CreatePostDialog from "./Dialogs/CreatePostDialog";
 import { GetPostByIdThunk, GetPostsThunk, GetSelectedPostActionActionCreator } from "../reducers/posts-reducer";
 import { PostTypeTranslations } from "../types";
 import { hasAnyRole, MANAGER, TEACHER } from "../RoleChecker";
+import CreateCommandTaskDialog from "./Dialogs/CreateCommandTaskDialog";
 const ChannelInfo: React.FC = () => {
     const channelState = useTypedSelector(state => state.channels); 
     const postsState = useTypedSelector(state => state.posts);
@@ -32,8 +33,11 @@ const ChannelInfo: React.FC = () => {
             
         <>
             {hasAnyRole([MANAGER, TEACHER]) && (
-                
+                <div className='simpleForm' style={{display : "flex", flexDirection : "row", justifyContent : "space-between" , gap: "8px"}} >
                     < CreatePostDialog/>
+                    < CreateCommandTaskDialog/>
+                </div>
+                    
                 
             )}
 
