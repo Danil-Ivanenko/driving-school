@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 
@@ -84,11 +84,26 @@ async function DeletePost(id: string)   {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}` 
         }
+        
     })
     }
     catch(e)
     {
-        return e
+        console.log(e)
+    }
+
+        try
+    {
+        await instance.delete(`api/tasks/${id}`,  {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }
+        
+    })
+    }
+    catch(e)
+    {
+        console.log(e)
     }
 };
 
@@ -551,6 +566,137 @@ async function DeleteComment(commentId : number)   {
     
 };
 
+async function CreateCommandTask( channelId :string, label: string, text: string, teamType : CommandTeamType, freeTeamCount: number, type : CommandSolutionType, minTeamSize : number, isCanRedistribute : boolean, deadline?: string, qualifiedMin? : number | null, documents? : File | null)   { 
+    try
+    {
+        const formData = new FormData();
+        formData.append('label', label);
+        formData.append('text', text);
+        formData.append('teamType', teamType.toString());
+        if(documents != null) {formData.append('documents', documents);} 
+        formData.append('freeTeamCount', freeTeamCount.toString() );
+        formData.append('type', type.toString());
+        formData.append('minTeamSize', minTeamSize.toString());
+        if(deadline != null) {formData.append('votingDeadline', deadline);} 
+        if(qualifiedMin != null) {formData.append('qualifiedMin', qualifiedMin.toString());} 
+        formData.append('isCanRedistribute ', isCanRedistribute.toString() ); 
+        
+        
+
+        const {data, status} = await instance.post(`api/tasks?channelId=${channelId}`,
+            formData,
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        return data
+    }
+    catch(e)
+    {
+        return e
+    }
+};
+
+async function GetTeamTask(taskid: string)   { 
+    try 
+    {
+        const { data, status } = await instance.get<Task>(`api/tasks/${taskid}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+        return data
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+};
+async function DeleteTeam(id: string)   { 
+    try
+    {
+        await instance.delete(`api/teams/${id}`,  {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }
+        
+    })
+    }
+    catch(e)
+    {
+        console.log(e)
+    }
+}
+
+async function DeleteUserFromTeam(teamId: string, userId : number)   { 
+    try
+    {
+        await instance.delete(`api/teams/${teamId}/members/${userId}`,  {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }
+        
+    })
+    }
+    catch(e)
+    {
+        console.log(e)
+    }
+}
+
+async function CreateTeam(name: string, taskId : string, deadline  : string)   { 
+    try 
+    {
+        const { data, status } =await instance.post(`api/teams`, {name : name, taskId: taskId, deadline: deadline},{
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        return data;
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+    
+};
+
+async function StudentJoinToTeam(teamId : string)   { 
+
+    try 
+    {
+        await instance.post(`api/teams/${teamId}/join`, {} ,{
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+    
+};
+
+async function StudentLeaveFromTeam(teamId : string)   { 
+    try 
+    {
+        await instance.delete(`api/teams/${teamId}/leave`,{
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+    } 
+    catch (e) 
+    {
+        console.error( e);
+    }
+    
+    
+};
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -587,5 +733,13 @@ export const api = {
     GetCommentsOfPost : GetCommentsOfPost,
     SendComment : SendComment,
     ChangeComment : ChangeComment, 
-    DeleteComment : DeleteComment
+    DeleteComment : DeleteComment,
+    
+    CreateCommandTask: CreateCommandTask,
+    GetTeamTask : GetTeamTask,
+    DeleteTeam : DeleteTeam,
+    CreateTeam : CreateTeam,
+    DeleteUserFromTeam : DeleteUserFromTeam,
+    StudentJoinToTeam : StudentJoinToTeam,
+    StudentLeaveFromTeam : StudentLeaveFromTeam
 }

@@ -4,17 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducers/channel-reducer";
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
-import { DeletePostsThunk } from "../../reducers/posts-reducer";
-const DeletePostDialog: React.FC = ()  => {
+import { DeletePostsThunk,  GetPostByIdThunk } from "../../reducers/posts-reducer";
+import { PostType, Task, Team } from "../../types";
+const DeleteTeamDilaog: React.FC<{ team: Team}> = ({ team}) => {
     const [isOpen, setOpen] = useState<boolean>(false);
     const dispatch: any = useDispatch()
-    const selectedPost = useTypedSelector(state => state.posts.selectedPost); 
-    
+    const postState = useTypedSelector(state => state.posts.selectedPost!) as Task; 
     const DeleteChannel = async () =>{
-            dispatch(DeletePostsThunk(selectedPost!.id))
+            
+            await api.DeleteTeam(team.id);
+            dispatch( GetPostByIdThunk(team.taskId, PostType.TEAM_TASK))
             setOpen(false)
         }
-
+   
     
 
 
@@ -28,7 +30,7 @@ const DeletePostDialog: React.FC = ()  => {
             {isOpen && (
                 <div className="modalOverlay" >
                     <dialog  className='centerpointModal'   >  
-                        <p  style={{fontSize :"20px", margin :"0px"}} >Удалить?</p>
+                        <p  style={{fontSize :"20px", margin :"0px"}} >Удалить команду {team.name}?</p>
                         
         
                         <div style={{display : "flex", justifyContent : "flex-end", gap :"5px"}} >
@@ -51,4 +53,4 @@ const DeletePostDialog: React.FC = ()  => {
     );
 }
 
-export default DeletePostDialog;
+export default DeleteTeamDilaog;

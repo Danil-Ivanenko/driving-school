@@ -5,10 +5,11 @@ import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducer
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
 import { GetPostByIdThunk } from "../../reducers/posts-reducer";
+import { Post, Task } from "../../types";
 const SendTaskDialog: React.FC = () => {
-    const postState = useTypedSelector(state => state.posts.selectedPost!); 
+    const postState = useTypedSelector(state => state.posts.selectedPost!) as Post; 
     const [isOpen, setOpen] = useState<boolean>(false);
-    
+
     const [text, setText] = useState<string>("");
     const [file, setFile] = useState<File| null>(null);
     const [fileName, setFileName] = useState<string>( "");
@@ -48,7 +49,7 @@ const SendTaskDialog: React.FC = () => {
 
     const handleDeleteFile = async () => {
         await api.StudentDeleteTask(postState.studentSolution!.id ) //удаление 
-        dispatch(GetPostByIdThunk(postState.id))
+        dispatch(GetPostByIdThunk(postState.id, postState.type))
         setOpen(false)
         setFile(null);
         setText("");
@@ -66,7 +67,7 @@ const SendTaskDialog: React.FC = () => {
             await api.StudentChangeTask(postState.studentSolution.id, text, file ) //изменение put
 
         }
-        dispatch(GetPostByIdThunk(postState.id))
+        dispatch(GetPostByIdThunk(postState.id, postState.type))
         setOpen(false)
     }
 

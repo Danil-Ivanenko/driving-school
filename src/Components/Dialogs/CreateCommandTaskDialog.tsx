@@ -4,10 +4,11 @@ import { ChangeEvent, use, useEffect, useRef, useState } from "react";
 
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
-import { CommandSolutionType, CommandTeamType, PostType } from "../../types";
+import { CommandSolutionType, CommandTeamType, ErrorResponse, PostType } from "../../types";
 import { GetPostsThunk } from "../../reducers/posts-reducer";
+import axios from "axios";
 
-const CreateCommandTaskDialog: React.FC = ()  => {
+const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  => {
     const [isOpen, setOpen] = useState<boolean>(false);
     const [postName, setPostName] = useState<string>('');
     const [postText, setPostText] = useState<string>('');
@@ -17,12 +18,19 @@ const CreateCommandTaskDialog: React.FC = ()  => {
     const [file, setFile] = useState<File| null>(null);
     const [postCommandSolutionType, setCommandSolutionType] = useState<CommandSolutionType>(CommandSolutionType.FIRST);
     const [qualifiedMin, setqualifiedMin] = useState<number | string>('');
-    
+     const [minTeamSize, sertMinTeamSize] = useState<number | string>('');
+
     const [isCanRedistribute, setIsCanRedistribute ] = useState<boolean>(true);
+    const [errorText, setErrorText] = useState<string>('');
+
+    const handleMinTeamSize = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        sertMinTeamSize(value === '' ? '' : Number(value));
+    };
     
     const handleIsCanRedistribute = (event: React.ChangeEvent<HTMLSelectElement>) => {
       setIsCanRedistribute(event.target.value === 'true');
-};
+    };
 
     const handleQualifiedMin = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -70,16 +78,38 @@ const CreateCommandTaskDialog: React.FC = ()  => {
     const dispatch: any = useDispatch()
     const selectedChannel = useTypedSelector(state => state.channels.selectedChannel);
 
-    const CreatePost = async () =>{
-        //await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file)
-        setOpen(false)
-        setPostName('')
-        setPostText('')
-        setPostDeadline('')
-        setFile(null);
-        setCommandCount(0);
+    const CreateCommandTask = async () =>{
+        const data = await api.CreateCommandTask(channelId, postName, postText, postCommandTeamType,
+                Number(commandCount), postCommandSolutionType, Number(minTeamSize),
+              isCanRedistribute, postDeadline, 
+              typeof qualifiedMin === 'string' ? null : Number(qualifiedMin) , 
+              file )
 
-        dispatch(GetPostsThunk(selectedChannel!.id))
+        if(axios.isAxiosError<ErrorResponse>(data))
+        {
+
+            console.log()
+            setErrorText(data.response?.data.message ||"")
+        }
+        else
+        {
+
+        
+            setOpen(false)
+            setPostName('')
+            setPostText('')
+            setCommandCount('');
+            setPostCommandTeamType(CommandTeamType.FREE)
+            setPostDeadline('')
+            setFile(null);
+            setCommandSolutionType(CommandSolutionType.FIRST)
+            setqualifiedMin('')
+            sertMinTeamSize('')
+            setIsCanRedistribute(true)
+            setErrorText('')
+
+            dispatch(GetPostsThunk(selectedChannel!.id))
+        }
     }
 
     return(
@@ -89,7 +119,7 @@ const CreateCommandTaskDialog: React.FC = ()  => {
             {isOpen && (
                 <div className="modalOverlay" >
                     <dialog  className='centerpointModal'   >  
-                        <p  style={{fontSize :"20px", margin :"0px"}} >Создать запись</p>
+                        <p  style={{fontSize :"20px", margin :"0px"}} >Создать командное задание</p>
                         
                         <div>
                             <label htmlFor="post-name" >Название*</label>
@@ -109,15 +139,15 @@ const CreateCommandTaskDialog: React.FC = ()  => {
                                 <option value={CommandTeamType.FREE}>Свободно</option>
                             </select>
                         </div>
-                        <div>
-                            <label htmlFor="post-deadline" >Срок </label>
-                            <input id="post-deadline" type='datetime-local' value={postDeadline}  onChange={handlePostDeadlineChange}/>
-                        </div>
+
                         <div>
                             <label htmlFor="post-command-count" >Кол-во команд*</label>
                              <input id="post-command-count" value={commandCount}  type="number"  onChange={handleCommandCountChange}/>
                         </div>
-
+                        <div >
+                            <label >Минимальное кол-во членов команды*</label>
+                             <input  value={minTeamSize}  type="number"  onChange={handleMinTeamSize}/>
+                        </div>
                         <div>
                             <label  >Тип сдачи*</label>
                             <select value={postCommandSolutionType} onChange={handleCommandSolutionTypeChange}>
@@ -129,10 +159,14 @@ const CreateCommandTaskDialog: React.FC = ()  => {
                             </select>
                         </div>
                         
-                        <div >
-                            <label >Кол-во квалификации</label>
-                             <input  value={qualifiedMin}  type="number"  onChange={handleQualifiedMin}/>
-                        </div>
+                        {postCommandSolutionType == CommandSolutionType.QUALIFIED && (
+                            <div >
+                                <label >Кол-во квалификации*</label>
+                                <input  value={qualifiedMin}  type="number"  onChange={handleQualifiedMin}/>
+                            </div>
+
+                            
+                        )}
 
 
                         <div >
@@ -142,14 +176,18 @@ const CreateCommandTaskDialog: React.FC = ()  => {
                                 <option value={'false'}>Нет</option>
                             </select>
                         </div>
+                        <div>
+                            <label htmlFor="post-deadline" >Срок </label>
+                            <input id="post-deadline" type='datetime-local' value={postDeadline}  onChange={handlePostDeadlineChange}/>
+                        </div>
 
                         <div>                    
                             <input type="file" multiple={false} onChange={handleFileChange}  />
                             
                         </div>
-        
+                        <b className={styles['error']} >{errorText}</b>
                         <div style={{display : "flex", justifyContent : "flex-end", gap :"5px"}} >
-                            <button className={styles.button} type="button" onClick={CreatePost} >
+                            <button className={styles.button} type="button" onClick={CreateCommandTask} >
                                 Создать 
                             </button>
                             

@@ -1,11 +1,12 @@
 import { Dispatch } from "redux";
-import { CommentDTO, Post, PostShort, PostType, StudentSolution } from "../types"
+import { CommentDTO, ErrorResponse, Post, PostShort, PostType, StudentSolution, Task, Team } from "../types"
 import { api } from "../API/api";
+import axios from "axios";
 
 
 type PostsState = {
     posts: PostShort[]
-    selectedPost: Post | null
+    selectedPost: Post | Task |  null
     solutions: StudentSolution[]
     comments: CommentDTO[]
 }
@@ -37,7 +38,7 @@ interface GetPostsAction {
 }
 interface GetSelectedPostAction {
     type: typeof GET_SELECTED_POST,
-    payload: Post | null
+    payload: Post |  Task | null
 }
 
 export const postsReducer = (
@@ -86,11 +87,19 @@ export const DeletePostsThunk =  (postId: string) =>{
     }
 }
 
-export const GetPostByIdThunk =  (postId: string) =>{
+export const GetPostByIdThunk =  (postId: string , type : PostType) =>{
     return async (dispatch: Dispatch<PostsActions>)  =>  {
-
-        const data = await api.GetPost(postId);
-        dispatch(GetSelectedPostActionActionCreator(data as Post)); 
+        if(type == PostType.TEAM_TASK)
+        {
+            const teamTask = await api.GetTeamTask(postId);
+            dispatch(GetSelectedPostActionActionCreator(teamTask as Task)); 
+        }
+        else
+        {
+            const post = await api.GetPost(postId);
+            dispatch(GetSelectedPostActionActionCreator(post as Post)); 
+        }
+        
     }
 }
 
@@ -111,7 +120,8 @@ export const GetCommentsByPostIdThunk =  (postId: string) =>{
     }
 }
 
-export const GetSelectedPostActionActionCreator = (post: Post | null): GetSelectedPostAction => ({
+
+export const GetSelectedPostActionActionCreator = (post: Post |   Task | null): GetSelectedPostAction => ({
       type: GET_SELECTED_POST,
       payload: post
 });

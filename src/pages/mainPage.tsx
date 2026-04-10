@@ -5,7 +5,7 @@ import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
 import { api } from '../API/api';
 import {GetChannelsThunk, SetSelectedChannelActionCreator} from '../reducers/channel-reducer'
-import { Channel } from '../types';
+import { Channel, Post, PostType, Task } from '../types';
 import { Dispatch } from 'redux';
 import Cources from '../Components/Courses'
 import ChannelInfo from '../Components/ChannelInfo'
@@ -15,6 +15,7 @@ import UsersChannelInfo from '../Components/UsersChannelInfo';
 import { hasAnyRole, MANAGER, TEACHER } from '../RoleChecker';
 import { GetMyProfileThunk } from '../reducers/myProfile-reducer';
 import HeaderComponent from '../Components/HeaderComponent';
+import CommandTaskInfo from '../Components/CommandTaskInfo';
 const MainPage: React.FC = () => {
     const [isCourseOpen, setCourseOpen] = useState<boolean>(true)
     const [isUsersOpen, setUsersOpen] = useState<boolean>(false)
@@ -37,7 +38,9 @@ const MainPage: React.FC = () => {
         dispatch(GetChannelsThunk())
 
     }, [])
-
+    function isPost(selected: Post | Task | null): selected is Post {
+        return selected !== null && 'studentSolution' in selected;
+    }
     return (
         
     <div className="app-container">
@@ -76,7 +79,10 @@ const MainPage: React.FC = () => {
                             post.selectedPost == null ? (
                                 <ChannelInfo/> 
                             ): (
-                                <PostInfo/>
+                                isPost(post.selectedPost) ?
+                                    (<PostInfo/>) 
+                                : 
+                                    (<CommandTaskInfo/>)
                             )
                         
                         )}

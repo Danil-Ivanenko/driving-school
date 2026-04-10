@@ -17,7 +17,8 @@ export type Channel = {
 
 export enum PostType{
     TASK = "TASK",  
-    NEWS = "NEWS"
+    NEWS = "NEWS",
+    TEAM_TASK = "TEAM_TASK"
 }
 
 export type PostShort ={
@@ -103,7 +104,7 @@ export type CommentDTO ={
 }
 
 export enum CommandTeamType{
-    RANDOM = "TASK",  
+    RANDOM = "RANDOM",  
     DRAFT = "DRAFT",
     FREE = "FREE"
 }
@@ -126,7 +127,8 @@ export enum CommandSolutionType{
 
 export const PostTypeTranslations: Record<PostType, string> = {
     [PostType.TASK]: "Задача",
-    [PostType.NEWS]: "Новость"
+    [PostType.NEWS]: "Новость",
+    [PostType.TEAM_TASK]: "Командное задание"
 };
 
 export type UserRole = 'STUDENT' | 'TEACHER' | 'MANAGER';
@@ -180,4 +182,32 @@ export interface SearchParams {
     name?: string;
     email?: string;
     role?: UserRole;
+}
+export interface Team {
+  id: string; 
+  name: string;
+  taskId: string
+  captainId: number;
+  isAvailableRevote: boolean;
+  isCaptainVotingActive: boolean;
+  mark: number;
+  deadline: string; 
+  softDeadline: string; 
+  users: ChannelUser[];
+}
+
+export interface Task {
+  id: string; 
+  label: string;
+  text: string;
+  channelId: string; 
+  startAt: string; 
+  documents: {fileName : string, fileUrl : string}[];
+  teamType: CommandTeamType;
+  type: CommandSolutionType
+  isCanRedistribute: boolean;
+  qualifiedMin: number;
+  minTeamSize: number;
+  votingDeadline: string; 
+  teams: Team[];
 }

@@ -5,7 +5,7 @@ import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
 import { api } from '../API/api';
 import {GetChannelsThunk, SetSelectedChannelActionCreator} from '../reducers/channel-reducer'
-import {  Post, PostType, PostTypeTranslations } from '../types';
+import {  Post, PostType, PostTypeTranslations, Task } from '../types';
 
 import DeletePostDialog from './Dialogs/DeletePostDialog';
 import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../RoleChecker';
@@ -14,33 +14,29 @@ import SendTaskDialog from './Dialogs/SendTaskDialog';
 import { GetCommentsByPostIdThunk, GetSolutionsByPostIdThunk } from '../reducers/posts-reducer';
 import OrderSolutionDialog from './Dialogs/OrderSolutionDialog';
 import PostComment from './Dialogs/PostComment';
+import TeamInfo from './Dialogs/TeamInfo';
+import CreateTeamDialog from './Dialogs/CreateTeamDialog';
 
 
-const PostInfo: React.FC = () => {
-    const [commentText, setCommentText] = useState<string>('');
-    const postState = useTypedSelector(state => state.posts.selectedPost!) as Post; 
+const CommandTaskInfo: React.FC = () => {
+    //const [commentText, setCommentText] = useState<string>('');
+    const postState = useTypedSelector(state => state.posts.selectedPost!) as Task; 
 
-    const dispatch: any = useDispatch()
-    const solutions = useTypedSelector(state => state.posts.solutions)
-    const comments = useTypedSelector(state => state.posts.comments)
-    useEffect(() => {
-        dispatch(GetChannelsThunk())
-        dispatch(GetSolutionsByPostIdThunk(postState.id))
-        dispatch(GetCommentsByPostIdThunk(postState.id))
-    }, [])
+
+
     
-    const handleCommentTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setCommentText(event.target.value); 
-    };
-    const SendNewComment = async () =>{
-        if(commentText.length > 0)
-        {
-            await api.SendComment(postState.id, commentText)
-            setCommentText("")
-            dispatch(GetCommentsByPostIdThunk(postState.id))
-        }
+    // const handleCommentTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //     setCommentText(event.target.value); 
+    // };
+    // const SendNewComment = async () =>{
+    //     if(commentText.length > 0)
+    //     {
+    //         await api.SendComment(postState.id, commentText)
+    //         setCommentText("")
+    //         dispatch(GetCommentsByPostIdThunk(postState.id))
+    //     }
 
-    }
+    // }
     
 
     return (
@@ -51,28 +47,52 @@ const PostInfo: React.FC = () => {
             
                 <div className='simpleForm' style={{ justifyContent :"space-between"}} >
                     <div style={{display: "flex",justifyContent : "space-between",  gap:"5px", alignItems: "center"}}>
-                        <p className='headline'>{PostTypeTranslations[postState.type]}: {postState.label} </p>
+                        <p className='headline'>Командное задание: {postState.label} </p>
+                        
                         <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
-                            {hasAnyRole([STUDENT]) && postState.type == PostType.TASK &&  < SendTaskDialog/> }
+                            {/* {hasAnyRole([STUDENT]) &&  < /> } здесь отправдять решения */}
                             {hasAnyRole([MANAGER,TEACHER]) && <DeletePostDialog/> }
                         </div>
                     </div>
                     
-                    {postState.fileName != null && postState.fileUrl != null &&
-                     (<p className='headline' onClick={() => window.location.href = postState.fileUrl!} style={{cursor : "pointer"}}> Файл: {postState.fileName} </p>)
+                    {postState?.documents[0]?.fileName != null && postState?.documents[0]?.fileUrl != null &&
+                     (<p className='headline' onClick={() => window.location.href = postState.documents[0].fileName} style={{cursor : "pointer"}}> Файл: {postState.documents[0].fileUrl} </p>)
                     }
 
                     
-                    {postState.deadline != null && (
-                        <p className='baseP'>Сдать до {postState.deadline}</p>
+                    {postState.votingDeadline != null && (
+                        <p className='baseP'>Сдать до {postState.votingDeadline}</p>
                     )}
 
 
                     <p> {postState.text}</p>
-
+                    <p className='baseP'>Тип команд: {postState.teamType}</p>
+                    <p className='baseP'>Тип сдачи: {postState.type}</p>
+                    <p className='baseP'>Перегруппировка: {postState.isCanRedistribute ? "+" : "-"}</p>
+                    <p className='baseP'>Минимальное кол-во членов команды: {postState.minTeamSize}</p>
+                    {postState.qualifiedMin != null && (
+                        <p className='baseP'>Кол-во квалификации: {postState.qualifiedMin}</p>
+                    )}
+                    <br></br>
+                    {hasAnyRole([MANAGER,TEACHER]) && <p className='headline'>Создать команду:  < CreateTeamDialog taskId={postState.id} /></p> }
+                    
+                    
                 </div>
                 
-                <div className='simpleForm'>  
+                
+                        
+                            
+                        
+                        {postState.teams.map((team) => (
+                            <div className='simpleForm' key={team.id}>  
+                                <TeamInfo team={team} />
+                                </div>
+                        ))}
+
+
+
+               
+                {/* <div className='simpleForm'>  
                         <div style={{display : "flex", justifyContent: "space-between"}}>
                             <p className='headline'>  Комментарии: {comments.length } </p>
                         </div>
@@ -91,14 +111,14 @@ const PostInfo: React.FC = () => {
 
                         }
 
-                </div>
+                </div> */}
 
                 
 
 
 
                 
-                {postState.type == PostType.TASK &&  hasAnyRole([MANAGER,TEACHER])  &&(
+                {/* {hasAnyRole([MANAGER,TEACHER])  &&(
 
                     <div className='simpleForm'>  
                         <div style={{display : "flex", justifyContent: "space-between"}}>
@@ -119,7 +139,7 @@ const PostInfo: React.FC = () => {
                         ))}
                     </div>
 
-                )}
+                )} */}
 
 
                 
@@ -130,4 +150,4 @@ const PostInfo: React.FC = () => {
     );
 };
 
-export default PostInfo
+export default CommandTaskInfo

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import '../css/mainPage.css'
+
 import styles from '../css/login.module.css'
 import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
