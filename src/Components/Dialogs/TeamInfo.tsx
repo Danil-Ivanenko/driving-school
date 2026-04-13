@@ -10,6 +10,7 @@ import { hasAnyRole, MANAGER, STUDENT, TEACHER } from "../../RoleChecker";
 import DeletePostDialog from "./DeletePostDialog";
 import DeleteTeamDilaog from "./DeleteTeamDilaog";
 import StudentParticipantInfo from "./StudentParticipantInfo";
+import AddMembersToTeamDialog from "./AddMembersToTeamDialog";
 const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
     const postState = useTypedSelector(state => state.posts.selectedPost!); 
     const [isOpen, setOpen] = useState<boolean>(false);
@@ -21,20 +22,26 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
         dispatch(GetPostByIdThunk(team.taskId, PostType.TEAM_TASK))
         setOpen(false)
     }
-    
+
+    const ChangeTeam = async (userId: number) =>{
+         await api.DeleteUserFromTeam(team.id, userId )
+
+        dispatch(GetPostByIdThunk(team.taskId, PostType.TEAM_TASK))
+        setOpen(false)
+    }
     return(
         <>
             <div  style={{marginTop : "10px"}}   > 
                 
                 <div style={{display: "flex",justifyContent : "space-between",  gap:"5px", alignItems: "center"}}>
-                        <p className='headline'> {team.name}</p>
+                        <div className='headline'  style={{ cursor: hasAnyRole([MANAGER, TEACHER]) ? 'pointer' : 'default' }}  > {team.name} <AddMembersToTeamDialog team={team} /></div>
                         
                         <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
                             {hasAnyRole([MANAGER,TEACHER]) && <DeleteTeamDilaog team={team}/> }
                             {hasAnyRole([STUDENT]) && <StudentParticipantInfo team={team}/> }
                         </div>
                 </div>
-
+                
                 { team.users.map((user) => (
                     <>
                         {hasAnyRole([MANAGER,TEACHER]) &&  <p className='userP' key={user.id} style={{ cursor: 'pointer' }} onClick={() => DeleteUserForomTeam(user.id)}> {team.captainId == user.id ? "Капитан:" : ""} {user.surname} {user.name} ❌ </p> }

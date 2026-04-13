@@ -11,7 +11,7 @@ import DeletePostDialog from './Dialogs/DeletePostDialog';
 import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../RoleChecker';
 import CreatePostDialog from './Dialogs/CreatePostDialog';
 import SendTaskDialog from './Dialogs/SendTaskDialog';
-import { GetCommentsByPostIdThunk, GetSolutionsByPostIdThunk } from '../reducers/posts-reducer';
+import { GetCommentsByPostIdThunk, GetPostByIdThunk, GetSolutionsByPostIdThunk } from '../reducers/posts-reducer';
 import OrderSolutionDialog from './Dialogs/OrderSolutionDialog';
 import PostComment from './Dialogs/PostComment';
 import TeamInfo from './Dialogs/TeamInfo';
@@ -75,6 +75,14 @@ const CommandTaskInfo: React.FC = () => {
         dispatch(GetChannelsThunk());
     };
 
+
+    const changeTaskRedistribute = async () => {
+        if (hasAnyRole([MANAGER, TEACHER])) {
+
+            await api.ChangeCommandTaskRedistribute(postState.id, !postState.isCanRedistribute);
+            dispatch(GetPostByIdThunk(postState.id ,PostType.TEAM_TASK ))
+        }
+        };
     return (
         
         <div className='containerCol' style={{ maxHeight: '100vh',   overflowY: 'auto'}}>
@@ -103,7 +111,7 @@ const CommandTaskInfo: React.FC = () => {
                     <p> {postState.text}</p>
                     <p className='baseP'>Тип команд: {postState.teamType}</p>
                     <p className='baseP'>Тип сдачи: {postState.type}</p>
-                    <p className='baseP'>Перегруппировка: {postState.isCanRedistribute ? "+" : "-"}</p>
+                    <p className='baseP' onClick={changeTaskRedistribute}>Перегруппировка: {postState.isCanRedistribute ? "+" : "-"}</p>
                     <p className='baseP'>Минимальное кол-во членов команды: {postState.minTeamSize}</p>
                     {postState.qualifiedMin != null && (
                         <p className='baseP'>Кол-во квалификации: {postState.qualifiedMin}</p>

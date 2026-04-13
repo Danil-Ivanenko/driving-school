@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
@@ -907,6 +907,67 @@ async function selectAcceptedSolution(taskId: string): Promise<TaskSolutionDto> 
 }
 
 
+async function ChangeCommandTaskRedistribute( taskId :string, isCanRedistribute : boolean)   { 
+    try
+    {
+        const formData = new FormData();
+
+        formData.append('isCanRedistribute ', isCanRedistribute.toString() ); 
+        
+        
+
+        const {data, status} = await instance.patch(`api/tasks/${taskId}`,
+            formData,
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        //return data
+    }
+    catch(e)
+    {
+        return e
+    }
+};
+
+async function GetStudentsWithOutTeam(taskId: string) {
+    try {
+        const { data } = await instance.get<ChannelUser[]>(`api/tasks/${taskId}/students/without-team`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch voting results:", e);
+        throw e;
+    }
+}
+
+async function AddUserToTeam( teamId :string, userId : number)   { 
+    try
+    {
+
+        
+
+        const {data, status} = await instance.post(`api/teams/${teamId}/members/${userId}`,
+            {},
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        //return data
+    }
+    catch(e)
+    {
+        return e
+    }
+};
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -966,4 +1027,8 @@ export const api = {
     getSelectedSolution,
     getVotingResults,
     selectAcceptedSolution,
+
+    ChangeCommandTaskRedistribute : ChangeCommandTaskRedistribute,
+    GetStudentsWithOutTeam : GetStudentsWithOutTeam,
+    AddUserToTeam : AddUserToTeam
 }

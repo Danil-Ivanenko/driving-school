@@ -173,3 +173,13 @@ dialog {
 }
 
 
+.studentItem {
+    padding: 8px;
+    margin: 4px 0;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.studentItem:hover {
+    background-color: #e0e0e0;
+}
