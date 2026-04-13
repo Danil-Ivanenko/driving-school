@@ -2,6 +2,8 @@ import axios, {AxiosError} from 'axios';
 import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
+import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
+
 
 
 
@@ -697,6 +699,214 @@ async function StudentLeaveFromTeam(teamId : string)   {
     
 };
 
+async function createTaskSolution(taskId: string, documents: File[] | null): Promise<TaskSolutionDto> {
+    try {
+        const formData = new FormData();
+        if (documents) {
+            documents.forEach(doc => {
+                formData.append('documents', doc);
+            });
+        }
+
+        const { data } = await instance.post<TaskSolutionDto>(
+            `api/task-solutions?taskId=${taskId}`,
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        return data;
+    } catch (e) {
+        console.error("Failed to create task solution:", e);
+        throw e;
+    }
+}
+
+
+async function getTaskSolutionById(solutionId: string): Promise<TaskSolutionDto> {
+    try {
+        const { data } = await instance.get<TaskSolutionDto>(`api/task-solutions/${solutionId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch task solution:", e);
+        throw e;
+    }
+}
+
+
+async function updateTaskSolution(solutionId: string, documents: File[] | null): Promise<TaskSolutionDto> {
+    try {
+        const formData = new FormData();
+        if (documents) {
+            documents.forEach(doc => {
+                formData.append('documents', doc);
+            });
+        }
+
+        const { data } = await instance.patch<TaskSolutionDto>(
+            `api/task-solutions/${solutionId}`,
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        return data;
+    } catch (e) {
+        console.error("Failed to update task solution:", e);
+        throw e;
+    }
+}
+
+
+async function deleteTaskSolution(solutionId: string): Promise<void> {
+    try {
+        await instance.delete(`api/task-solutions/${solutionId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+    } catch (e) {
+        console.error("Failed to delete task solution:", e);
+        throw e;
+    }
+}
+
+
+async function getTaskSolutionsByTask(taskId: string): Promise<TaskSolutionDto[]> {
+    try {
+        const { data } = await instance.get<TaskSolutionDto[]>(`api/task-solutions/task/${taskId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch task solutions:", e);
+        throw e;
+    }
+}
+
+
+async function getMyTaskSolutions(): Promise<TaskSolutionDto[]> {
+    try {
+        const { data } = await instance.get<TaskSolutionDto[]>(`api/task-solutions/my`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch my solutions:", e);
+        throw e;
+    }
+}
+
+async function voteForSolution(taskId: string, solutionId: string): Promise<SolutionVoteDto> {
+    try {
+        const { data } = await instance.post<SolutionVoteDto>(
+            `api/task-solutions/vote`,
+            { taskId, solutionId },
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            }
+        );
+        return data;
+    } catch (e) {
+        console.error("Failed to vote for solution:", e);
+        throw e;
+    }
+}
+
+
+async function cancelVote(taskId: string): Promise<void> {
+    try {
+        await instance.delete(`api/task-solutions/vote/${taskId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+    } catch (e) {
+        console.error("Failed to cancel vote:", e);
+        throw e;
+    }
+}
+
+
+async function getMyVote(taskId: string): Promise<SolutionVoteDto | null> {
+    try {
+        const { data } = await instance.get<SolutionVoteDto>(`api/task-solutions/vote/my/${taskId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+
+        return null;
+    }
+}
+
+
+async function getSelectedSolution(taskId: string): Promise<TaskSolutionDto | null> {
+    try {
+        const { data } = await instance.get<TaskSolutionDto>(`api/task-solutions/${taskId}/selected-solution`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        return null;
+    }
+}
+
+
+async function getVotingResults(taskId: string): Promise<VotingResultsDto> {
+    try {
+        const { data } = await instance.get<VotingResultsDto>(`api/task-solutions/${taskId}/voting-results`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch voting results:", e);
+        throw e;
+    }
+}
+
+
+async function selectAcceptedSolution(taskId: string): Promise<TaskSolutionDto> {
+    try {
+        const { data } = await instance.post<TaskSolutionDto>(
+            `api/task-solutions/${taskId}/select-accepted`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            }
+        );
+        return data;
+    } catch (e) {
+        console.error("Failed to select accepted solution:", e);
+        throw e;
+    }
+}
+
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -741,5 +951,19 @@ export const api = {
     CreateTeam : CreateTeam,
     DeleteUserFromTeam : DeleteUserFromTeam,
     StudentJoinToTeam : StudentJoinToTeam,
-    StudentLeaveFromTeam : StudentLeaveFromTeam
+    StudentLeaveFromTeam : StudentLeaveFromTeam,
+
+
+    createTaskSolution,
+    getTaskSolutionById,
+    updateTaskSolution,
+    deleteTaskSolution,
+    getTaskSolutionsByTask,
+    getMyTaskSolutions,
+    voteForSolution,
+    cancelVote,
+    getMyVote,
+    getSelectedSolution,
+    getVotingResults,
+    selectAcceptedSolution,
 }

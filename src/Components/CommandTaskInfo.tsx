@@ -16,28 +16,64 @@ import OrderSolutionDialog from './Dialogs/OrderSolutionDialog';
 import PostComment from './Dialogs/PostComment';
 import TeamInfo from './Dialogs/TeamInfo';
 import CreateTeamDialog from './Dialogs/CreateTeamDialog';
+import TaskSolutionManager from './Dialogs/TaskSolutionManager'; 
 
 
 const CommandTaskInfo: React.FC = () => {
-    //const [commentText, setCommentText] = useState<string>('');
     const postState = useTypedSelector(state => state.posts.selectedPost!) as Task; 
+    const dispatch: any = useDispatch();
 
+    const [showTaskSolutionManager, setShowTaskSolutionManager] = useState(false);
+    const [mySolutionExists, setMySolutionExists] = useState(false);
+    const [solutionsCount, setSolutionsCount] = useState(0);
 
+    useEffect(() => {
+        const checkSolutions = async () => {
+            if (hasAnyRole([STUDENT])) {
+                try {
+                    const mySolutions = await api.getMyTaskSolutions();
+                    const hasSolution = mySolutions.some(s => s.taskId === postState.id);
+                    setMySolutionExists(hasSolution);
+                } catch (err) {
+                    console.error('Failed to check my solution:', err);
+                }
+            }
+            
+            if (hasAnyRole([MANAGER, TEACHER])) {
+                try {
+                    const allSolutions = await api.getTaskSolutionsByTask(postState.id);
+                    setSolutionsCount(allSolutions.length);
+                } catch (err) {
+                    console.error('Failed to get solutions count:', err);
+                }
+            }
+        };
+        
+        checkSolutions();
+    }, [postState.id]);
 
-    
-    // const handleCommentTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     setCommentText(event.target.value); 
-    // };
-    // const SendNewComment = async () =>{
-    //     if(commentText.length > 0)
-    //     {
-    //         await api.SendComment(postState.id, commentText)
-    //         setCommentText("")
-    //         dispatch(GetCommentsByPostIdThunk(postState.id))
-    //     }
-
-    // }
-    
+    const refreshData = async () => {
+        if (hasAnyRole([STUDENT])) {
+            try {
+                const mySolutions = await api.getMyTaskSolutions();
+                const hasSolution = mySolutions.some(s => s.taskId === postState.id);
+                setMySolutionExists(hasSolution);
+            } catch (err) {
+                console.error('Failed to refresh my solution:', err);
+            }
+        }
+        
+        if (hasAnyRole([MANAGER, TEACHER])) {
+            try {
+                const allSolutions = await api.getTaskSolutionsByTask(postState.id);
+                setSolutionsCount(allSolutions.length);
+            } catch (err) {
+                console.error('Failed to refresh solutions count:', err);
+            }
+        }
+        
+        dispatch(GetChannelsThunk());
+    };
 
     return (
         
@@ -50,7 +86,6 @@ const CommandTaskInfo: React.FC = () => {
                         <p className='headline'>Командное задание: {postState.label} </p>
                         
                         <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
-                            {/* {hasAnyRole([STUDENT]) &&  < /> } здесь отправдять решения */}
                             {hasAnyRole([MANAGER,TEACHER]) && <DeletePostDialog/> }
                         </div>
                     </div>
@@ -74,80 +109,54 @@ const CommandTaskInfo: React.FC = () => {
                         <p className='baseP'>Кол-во квалификации: {postState.qualifiedMin}</p>
                     )}
                     <br></br>
-                    {hasAnyRole([MANAGER,TEACHER]) && <p className='headline'>Создать команду:  < CreateTeamDialog taskId={postState.id} /></p> }
                     
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+                        {hasAnyRole([STUDENT]) && (
+                            <button 
+                                className={styles.button}
+                                onClick={() => setShowTaskSolutionManager(true)}
+                            >
+                                {mySolutionExists ? 'Редактировать решение' : 'Отправить решение'}
+                            </button>
+                        )}
+                        
+                        {hasAnyRole([MANAGER, TEACHER]) && (
+                            <button 
+                                className={styles.button}
+                                onClick={() => setShowTaskSolutionManager(true)}
+                            >
+                                Все решения ({solutionsCount})
+                            </button>
+                        )}
+                    </div>
+                    
+                    {hasAnyRole([MANAGER,TEACHER]) && <p className='headline'>Создать команду:  < CreateTeamDialog taskId={postState.id} /></p> }
                     
                 </div>
                 
-                
-                        
-                            
-                        
-                        {postState.teams.map((team) => (
-                            <div className='simpleForm' key={team.id}>  
-                                <TeamInfo team={team} />
-                                </div>
-                        ))}
-
-
-
-               
-                {/* <div className='simpleForm'>  
-                        <div style={{display : "flex", justifyContent: "space-between"}}>
-                            <p className='headline'>  Комментарии: {comments.length } </p>
+                {showTaskSolutionManager && (
+                    <div className="modal-overlay">
+                        <div className="modal-content large">
+                            <TaskSolutionManager
+                                taskId={postState.id}
+                                isTeacher={hasAnyRole([MANAGER, TEACHER])}
+                                onClose={() => {
+                                    setShowTaskSolutionManager(false);
+                                    refreshData();
+                                }}
+                            />
                         </div>
-                        
-                        <div >
-                            <label htmlFor="comment-name" >Оставить комменатрий</label>
-                            <input id="comment-name" value={commentText} onChange={handleCommentTextChange}  />
-                            <button className={styles.button} style={{marginTop : "5px"}} onClick={SendNewComment} >Отправить</button>
-                        </div>
-
-                        { 
-                            
-                            comments.map((comment) => (
-                                <PostComment comment={comment} key={comment.id} />
-                            ))
-
-                        }
-
-                </div> */}
-
-                
-
-
-
-                
-                {/* {hasAnyRole([MANAGER,TEACHER])  &&(
-
-                    <div className='simpleForm'>  
-                        <div style={{display : "flex", justifyContent: "space-between"}}>
-                            <p className='headline'> Решения </p>
-                        </div>
-
-                        {solutions.map((sol) => (
-
-                            <div key={sol.id} style={{marginTop : "10px"}}   >
-                                 <p className='baseP'> <b> Пользователь:</b>  {sol.studentName}</p>
-                                 <p className='baseP'> <b> Текст:</b>  {sol.text}</p>
-                                 {sol.fileUrl !== null && ( <p className='baseP' style={{cursor : "pointer"}} onClick={() => window.location.href = sol.fileUrl!} > <b> Файл:</b>   {sol.fileName}</p> )}
-                                
-                                < OrderSolutionDialog solId={sol.id} mark={sol.mark}/>
-                                <hr className="hr" />
-                            </div>
-                            
-                        ))}
                     </div>
-
-                )} */}
-
-
+                )}
                 
-           
-    
-        </div>
+                {postState.teams.map((team) => (
+                    <div className='simpleForm' key={team.id}>  
+                        <TeamInfo team={team} />
+                    </div>
+                ))}
 
-    );
-};
+            </div>
+        );
+    };
 
-export default CommandTaskInfo
+export default CommandTaskInfo;

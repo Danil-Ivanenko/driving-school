@@ -1,0 +1,314 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow: hidden;
+    margin: 40px auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content.large {
+    max-width: 800px;
+}
+
+.solutions-list {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+/* Modal Header - крестик в правом углу */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.modal-header button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #9ca3af;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.modal-header button:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* Solution Form */
+.solution-form {
+    padding: 20px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.solution-form h4 {
+    margin: 0 0 12px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.solution-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.solution-form input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+}
+
+.solution-form .error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 8px;
+}
+
+/* Кнопки синего цвета */
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.form-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.form-buttons button:first-child {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.form-buttons button:first-child:hover {
+    background-color: #2563eb;
+}
+
+.form-buttons button:first-child:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
+}
+
+.form-buttons button:last-child {
+    background-color: #ef4444;
+    color: white;
+}
+
+.form-buttons button:last-child:hover {
+    background-color: #dc2626;
+}
+
+/* Solutions Container */
+.solutions-container {
+    padding: 20px;
+    flex: 1;
+}
+
+.solutions-container h4 {
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Solution Card */
+.solution-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.solution-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.solution-header strong {
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+.solution-header span {
+    font-size: 0.7rem;
+    color: #9ca3af;
+}
+
+.solution-file {
+    margin: 8px 0;
+}
+
+.solution-file a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.solution-file a:hover {
+    background: #e0e7ff;
+    text-decoration: underline;
+}
+
+.solution-mark {
+    margin-top: 10px;
+    padding: 8px;
+    background: #d1fae5;
+    border-radius: 8px;
+    color: #065f46;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.solution-ungraded {
+    margin-top: 10px;
+    padding: 8px;
+    background: #fef3c7;
+    border-radius: 8px;
+    color: #d97706;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.pending {
+    color: #f59e0b;
+    font-weight: 500;
+}
+
+.grade-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.grade-form input {
+    width: 60px;
+    padding: 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.grade-form button {
+    padding: 6px 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.grade-form button:hover {
+    background-color: #2563eb;
+}
+
+.solution-actions {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.solution-actions button {
+    padding: 6px 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.solution-actions button:hover {
+    background-color: #2563eb;
+}
+
+.delete-btn {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.delete-btn:hover {
+    background-color: #dc2626;
+}
+
+.solutions-container p {
+    text-align: center;
+    padding: 30px;
+    color: #9ca3af;
+}
+
+.solutions-list > div:first-child {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+}

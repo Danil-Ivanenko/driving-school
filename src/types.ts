@@ -211,3 +211,67 @@ export interface Task {
   votingDeadline: string; 
   teams: Team[];
 }
+
+
+export interface TaskDocumentDto {
+    fileName: string;
+    fileUrl: string;
+}
+
+
+export interface TaskSolutionDto {
+    id: string;
+    taskId: string;
+    studentId: number;
+    documents: TaskDocumentDto[];
+    mark?: number;
+    createdAt: string;
+    updatedAt?: string;
+}
+
+
+export interface CreateTaskSolutionDto {
+    documents?: File[];
+}
+
+
+export interface UpdateTaskSolutionDto {
+    documents?: File[];
+}
+
+
+export interface CreateSolutionVoteDto {
+    taskId: string;
+    solutionId: string;
+}
+
+
+export interface SolutionVoteDto {
+    id: string;
+    taskId: string;
+    solutionId: string;
+    voterId: number;
+    voterName: string;
+}
+
+
+export interface VotingResultsDto {
+    taskId: string;
+    taskLabel: string;
+    isAnonymous: boolean;
+    totalVotes: number;
+    results: VoteResultDto[];
+}
+
+export interface VoteResultDto {
+    solutionId: string;
+    solutionLabel: string;
+    votesCount: number;
+    percentage: number;
+    voters: VoterInfoDto[];
+}
+
+export interface VoterInfoDto {
+    voterId: number;
+    voterName: string;
+}
