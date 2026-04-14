@@ -4,14 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducers/channel-reducer";
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
-import { ChannelUser, PostType, Task, Team } from "../../types";
+import { ChannelUser, InviteDto, PostType, Task, Team } from "../../types";
 import { GetPostByIdThunk } from "../../reducers/posts-reducer";
+import InviteStudentToTeamDialog from "./InviteStudentToTeamDialog";
 const StudentParticipantInfo:  React.FC<{ team: Team}> = ({ team}) => {
 
     const dispatch: any = useDispatch()
 
     const postState = useTypedSelector(state => state.posts.selectedPost!) as Task; 
     const userId = localStorage.getItem('id');
+    const [myInvites, setMyInvites] = useState<InviteDto[]>([]);
+    useEffect(() => {
+
+
+    fetchMyInvites();
+  }, [])
+
+    const fetchMyInvites = async () => {
+            const invites = await api.GetMyInvites() as InviteDto[];
+            setMyInvites(invites);
+
+        };
+
     const JoinToTeam = async () =>{
             
         await api.StudentJoinToTeam(team.id)
@@ -38,19 +52,35 @@ const StudentParticipantInfo:  React.FC<{ team: Team}> = ({ team}) => {
         return team.users.some((member: any) => member.id == userId);
     };
 
+    const invite = myInvites.find(invite => invite.teamId === team.id);
+    const hasInvite = !!invite;
+
+    const AcceptInvite = async () =>{
+            
+        await api.AcceptInvite(invite!.id)
+        dispatch(GetPostByIdThunk(team.taskId, PostType.TEAM_TASK))
+        fetchMyInvites();
+    }
 
     return(
        <>
         {postState.isCanRedistribute  &&(
             isUserInCurrentTeam() ? (
-                <button className="roundBtn" onClick={LeaveFromTeam} >
-                    -
-                </button>
+                <>
+                    <InviteStudentToTeamDialog team={team} />
+                    <button className="roundBtn" onClick={LeaveFromTeam} >
+                        -
+                    </button>
+                    
+                 </>
             ) : (
                 !isUserInAnyTeam() && (
-                    <button className="roundBtn" onClick={JoinToTeam} >
-                        +
-                    </button>
+                    <> 
+                        {hasInvite && <div  style={{display : "inline-flex"}} className='course-block' onClick={AcceptInvite}> Принять</div>}
+                        <button className="roundBtn" onClick={JoinToTeam} >
+                            +
+                        </button>
+                    </>
                 )
             )
         )}

@@ -11,6 +11,7 @@ import DeletePostDialog from "./DeletePostDialog";
 import DeleteTeamDilaog from "./DeleteTeamDilaog";
 import StudentParticipantInfo from "./StudentParticipantInfo";
 import AddMembersToTeamDialog from "./AddMembersToTeamDialog";
+import InviteStudentToTeamDialog from "./InviteStudentToTeamDialog";
 const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
     const postState = useTypedSelector(state => state.posts.selectedPost!); 
     const [isOpen, setOpen] = useState<boolean>(false);
@@ -34,11 +35,14 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
             <div  style={{marginTop : "10px"}}   > 
                 
                 <div style={{display: "flex",justifyContent : "space-between",  gap:"5px", alignItems: "center"}}>
-                        <div className='headline'  style={{ cursor: hasAnyRole([MANAGER, TEACHER]) ? 'pointer' : 'default' }}  > {team.name} <AddMembersToTeamDialog team={team} /></div>
+                        <div className='headline'  style={{ cursor: hasAnyRole([MANAGER, TEACHER]) ? 'pointer' : 'default' }}  > {team.name}   {hasAnyRole([MANAGER,TEACHER]) &&<AddMembersToTeamDialog team={team} /> } </div>
                         
                         <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
                             {hasAnyRole([MANAGER,TEACHER]) && <DeleteTeamDilaog team={team}/> }
+                            
+                           
                             {hasAnyRole([STUDENT]) && <StudentParticipantInfo team={team}/> }
+                            
                         </div>
                 </div>
                 

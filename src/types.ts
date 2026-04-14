@@ -275,3 +275,11 @@ export interface VoterInfoDto {
     voterId: number;
     voterName: string;
 }
+
+export interface InviteDto {
+  id: string; 
+  teamId: string; 
+  teamName: string;
+  inviterId: number; 
+  inviterName: string;
+}

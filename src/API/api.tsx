@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
@@ -7,7 +7,7 @@ import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, Cr
 
 
 
-const baseURL ='http://localhost:8080/';
+const baseURL ='http://localhost:8081/';
 export const instance = axios.create({
     baseURL : baseURL
 });
@@ -968,6 +968,84 @@ async function AddUserToTeam( teamId :string, userId : number)   {
     }
 };
 
+
+async function GetStudentsToInvie(teamId: string) {
+    try {
+        const { data } = await instance.get<ChannelUser[]>(`api/teams/${teamId}/invite/available`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch voting results:", e);
+        throw e;
+    }
+}
+
+async function InviteUserToTeam( teamId :string, userId : number)   { 
+    try
+    {
+
+        
+
+        const {data, status} = await instance.post(`api/teams/${teamId}/invite/${userId}`,
+            {},
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        //return data
+    }
+    catch(e)
+    {
+        return e
+    }
+};
+
+async function AcceptInvite(inviteId :string)   { 
+    try
+    {
+
+        const {data, status} = await instance.post(`api/teams/invites/${inviteId}/accept`,
+            {},
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        //return data
+    }
+    catch(e)
+    {
+        return e
+    }
+};
+
+async function GetMyInvites()   { 
+    try
+    {
+
+        const {data, status} = await instance.get<InviteDto[]>(`api/teams/invites/my`,
+   
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        return data
+    }
+    catch(e)
+    {
+        return e
+    }
+};
+
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -1030,5 +1108,10 @@ export const api = {
 
     ChangeCommandTaskRedistribute : ChangeCommandTaskRedistribute,
     GetStudentsWithOutTeam : GetStudentsWithOutTeam,
-    AddUserToTeam : AddUserToTeam
+    AddUserToTeam : AddUserToTeam,
+
+    GetStudentsToInvie : GetStudentsToInvie,
+    InviteUserToTeam : InviteUserToTeam,
+    AcceptInvite : AcceptInvite,
+    GetMyInvites : GetMyInvites
 }
