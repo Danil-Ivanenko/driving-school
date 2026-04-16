@@ -14,6 +14,7 @@ import AddMembersToTeamDialog from "./AddMembersToTeamDialog";
 import InviteStudentToTeamDialog from "./InviteStudentToTeamDialog";
 import TeamMarkDialog from "./TeamMarkDialog";
 import StudentMarkDialog from "./StudentMarkDialog";
+import DelelteOrMakeCapitanDialog from "./DelelteOrMakeCapitanDialog";
 const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
     const postState = useTypedSelector(state => state.posts.selectedPost!); 
     const [isOpen, setOpen] = useState<boolean>(false);
@@ -95,12 +96,6 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
     const [selectedStudent, setSelectedStudent] = useState<{ id: number; name: string; surname: string } | null>(null);
 
     const dispatch: any = useDispatch()
-    const DeleteUserForomTeam = async (userId: number) =>{
-         await api.DeleteUserFromTeam(team.id, userId )
-
-        dispatch(GetPostByIdThunk(team.taskId, PostType.TEAM_TASK))
-        setOpen(false)
-    }
 
     const ChangeTeam = async (userId: number) =>{
          await api.DeleteUserFromTeam(team.id, userId )
@@ -119,6 +114,13 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
                         <div className='headline'  style={{ cursor: hasAnyRole([MANAGER, TEACHER]) ? 'pointer' : 'default' }}  > {team.name}   {hasAnyRole([MANAGER,TEACHER]) &&<AddMembersToTeamDialog team={team} /> } </div>
                         
                         <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
+                            {hasAnyRole([MANAGER, TEACHER]) &&  team.users.length > 0 && (
+                                <button className='course-block' onClick={() => setShowTeamMarkDialog(true)} >
+                                    {team.mark ? `Оценка команды: ${team.mark}` : 'Поставить оценку команде'}
+                                </button>
+                            )}
+                
+                            
                             {hasAnyRole([MANAGER,TEACHER]) && <DeleteTeamDilaog team={team}/> }
                             
                            
@@ -127,15 +129,12 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
                         </div>
                 </div>
 
-                {hasAnyRole([MANAGER, TEACHER]) && (
-                    <button className={styles.button} onClick={() => setShowTeamMarkDialog(true)} style={{ marginTop: '10px' }}>
-                        {team.mark ? `Оценка команды: ${team.mark}` : 'Поставить оценку команде'}
-                    </button>
-                )}
-                
+
                 { team.users.map((user) => (
-                    <>
-                        {hasAnyRole([MANAGER,TEACHER]) &&  <p className='userP' key={user.id} style={{ cursor: 'pointer' }} onClick={() => DeleteUserForomTeam(user.id)}> {team.captainId == user.id ? "Капитан:" : ""} {user.surname} {user.name} ❌ </p> }
+                    <div style={{display : "flex" , marginTop: "15px"}}>
+                        {hasAnyRole([MANAGER,TEACHER]) &&  <p className='userP' key={user.id} style={{ cursor: 'pointer' }} > {team.captainId == user.id ? "Капитан:" : ""} {user.surname} {user.name} </p> }
+
+                        {hasAnyRole([MANAGER,TEACHER]) &&  <DelelteOrMakeCapitanDialog team={team} user={user}/> }
                         {hasAnyRole([STUDENT]) &&  <p className='userP' key={user.id} > {team.captainId == user.id ? "Капитан:" : ""} {user.surname} {user.name}  </p> }
                         
                         {hasAnyRole([MANAGER, TEACHER]) && (
@@ -147,7 +146,7 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
                                 Оценить
                             </button>
                         )}
-                    </>
+                    </div>
                     
                    
                 ))}

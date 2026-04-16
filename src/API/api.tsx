@@ -1131,6 +1131,20 @@ async function getMyTeamByTask(taskId: string): Promise<Team | null> {
 }
 
 
+async function MakeUserCapitan(teamId: string, userId : number) {
+    try {
+        await instance.patch(`api/teams/${teamId}`, {captainId : userId}, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+    } catch (e) {
+        console.error("Failed to set user mark:", e);
+        throw e;
+    }
+}
+
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -1206,4 +1220,6 @@ export const api = {
     setTeamMark,
     getTaskTeams,
     getMyTeamByTask,
+
+    MakeUserCapitan : MakeUserCapitan
 }
