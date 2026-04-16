@@ -27,6 +27,45 @@ const CommandTaskInfo: React.FC = () => {
     const [mySolutionExists, setMySolutionExists] = useState(false);
     const [solutionsCount, setSolutionsCount] = useState(0);
 
+    const [isInTeam, setIsInTeam] = useState<boolean>(false);
+    const [loadingTeamCheck, setLoadingTeamCheck] = useState(true);
+
+    useEffect(() => {
+        if (hasAnyRole([STUDENT])) {
+            checkStudentTeam();
+        }
+    }, [postState.id]);
+
+    const checkStudentTeam = async () => {
+        setLoadingTeamCheck(true);
+        try {
+            const studentTeam = await api.getMyTeamByTask(postState.id);
+            setIsInTeam(!!studentTeam);
+        } catch (err) {
+            setIsInTeam(false);
+        } finally {
+            setLoadingTeamCheck(false);
+        }
+    };
+
+    useEffect(() => {
+        const updateTeamStatus = async () => {
+            if (hasAnyRole([STUDENT])) {
+                setLoadingTeamCheck(true);
+                try {
+                    const myTeam = await api.getMyTeamByTask(postState.id);
+                    setIsInTeam(!!myTeam);
+                } catch (err) {
+                    setIsInTeam(false);
+                } finally {
+                    setLoadingTeamCheck(false);
+                }
+            }
+        };
+        
+        updateTeamStatus();
+    }, [postState]); 
+
     useEffect(() => {
         const checkSolutions = async () => {
             if (hasAnyRole([STUDENT])) {
@@ -119,13 +158,34 @@ const CommandTaskInfo: React.FC = () => {
                     <br></br>
                     
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
-                        {hasAnyRole([STUDENT]) && (
+                        {/* {hasAnyRole([STUDENT]) && (
                             <button 
                                 className={styles.button}
                                 onClick={() => setShowTaskSolutionManager(true)}
                             >
                                 {mySolutionExists ? 'Редактировать решение' : 'Отправить решение'}
                             </button>
+                        )} */}
+                        {hasAnyRole([STUDENT]) && !loadingTeamCheck && isInTeam && (
+                            <button 
+                                className={styles.button}
+                                onClick={() => setShowTaskSolutionManager(true)}
+                            >
+                                {mySolutionExists ? 'Редактировать решение' : 'Отправить решение'}
+                            </button>
+                        )}
+
+
+                        {hasAnyRole([STUDENT]) && !loadingTeamCheck && !isInTeam && (
+                            <div style={{ 
+                                padding: '8px 12px', 
+                                background: '#fee2e2', 
+                                color: '#dc2626', 
+                                borderRadius: '6px',
+                                fontSize: '0.85rem'
+                            }}>
+                                Вы не состоите в команде.
+                            </div>
                         )}
                         
                         {hasAnyRole([MANAGER, TEACHER]) && (

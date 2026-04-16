@@ -3,11 +3,11 @@ import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxCh
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
+import { MarkResponse, Team } from '../types';
 
 
 
-
-const baseURL ='http://localhost:8081/';
+const baseURL ='http://localhost:8080/';
 export const instance = axios.create({
     baseURL : baseURL
 });
@@ -1045,6 +1045,91 @@ async function GetMyInvites()   {
     }
 };
 
+async function getUserMark(userId: number, taskId: string): Promise<MarkResponse | null> {
+    try {
+        const { data } = await instance.get<MarkResponse>(`api/mark/user/${userId}/task/${taskId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch user mark:", e);
+        return null;
+    }
+}
+
+async function setUserMark(userId: number, taskId: string, mark: number): Promise<void> {
+    try {
+        await instance.post(`api/mark/user/${userId}/task/${taskId}?mark=${mark}`, null, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+    } catch (e) {
+        console.error("Failed to set user mark:", e);
+        throw e;
+    }
+}
+
+async function getTeamMark(teamId: string): Promise<number | null> {
+    try {
+        const { data } = await instance.get<number>(`api/teams/${teamId}/mark`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch team mark:", e);
+        return null;
+    }
+}
+
+async function setTeamMark(teamId: string, mark: number): Promise<void> {
+    try {
+        await instance.post(`api/teams/${teamId}/mark?mark=${mark}`, null, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+    } catch (e) {
+        console.error("Failed to set team mark:", e);
+        throw e;
+    }
+}
+
+async function getTaskTeams(taskId: string): Promise<Team[]> {
+    try {
+        const { data } = await instance.get<Team[]>(`api/teams/task/${taskId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch task teams:", e);
+        return [];
+    }
+}
+
+async function getMyTeamByTask(taskId: string): Promise<Team | null> {
+    try {
+        const teams = await getTaskTeams(taskId);
+        
+        const profile = await getProfile();
+        
+        const myTeam = teams.find(team => 
+            team.users?.some(user => user.id === profile.id)
+        );
+        
+        return myTeam || null;
+    } catch (e) {
+        console.error("Failed to get my team:", e);
+        return null;
+    }
+}
+
 
 export const api = {
     login : login,
@@ -1113,5 +1198,12 @@ export const api = {
     GetStudentsToInvie : GetStudentsToInvie,
     InviteUserToTeam : InviteUserToTeam,
     AcceptInvite : AcceptInvite,
-    GetMyInvites : GetMyInvites
+    GetMyInvites : GetMyInvites,
+
+    getUserMark,
+    setUserMark,
+    getTeamMark,
+    setTeamMark,
+    getTaskTeams,
+    getMyTeamByTask,
 }

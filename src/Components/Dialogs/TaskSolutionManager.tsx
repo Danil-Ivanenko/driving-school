@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../API/api';
+import { useTypedSelector } from '../../store';
+import { Post, PostType, PostTypeTranslations, Task } from '../../types';
 import { TaskSolutionDto } from '../../types';
+import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../../RoleChecker';
 require('../../css/solution.css');
+
 
 interface TaskSolutionManagerProps {
     taskId: string;
@@ -16,10 +20,10 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
 }) => {
     const [solutions, setSolutions] = useState<TaskSolutionDto[]>([]);
     const [mySolution, setMySolution] = useState<TaskSolutionDto | null>(null);
+    const [myTeamId, setMyTeamId] = useState<string | null>(null);
+    const [teamStudentIds, setTeamStudentIds] = useState<Set<number>>(new Set());
     const [loading, setLoading] = useState(true);
-    const [documents, setDocuments] = useState<File[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [studentNames, setStudentNames] = useState<Map<number, { name: string; surname: string }>>(new Map());
 
     useEffect(() => {
         loadData();
@@ -28,19 +32,89 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
     const loadData = async () => {
         setLoading(true);
         try {
-            const allSolutions = await api.getTaskSolutionsByTask(taskId);
-            setSolutions(allSolutions);
-
-            const mySolutions = await api.getMyTaskSolutions();
-            const my = mySolutions.find(s => s.taskId === taskId);
-            setMySolution(my || null);
+            if (isTeacher) {
+                const allSolutions = await api.getTaskSolutionsByTask(taskId);
+                setSolutions(allSolutions);
+            } else {
+                const myTeam = await api.getMyTeamByTask(taskId);
+                
+                if (myTeam) {
+                    const teamMembersMap = new Map();
+                    myTeam.users.forEach(user => {
+                        teamMembersMap.set(user.id, { 
+                            name: user.name, 
+                            surname: user.surname 
+                        });
+                    });
+                    setStudentNames(teamMembersMap);
+                    
+                    const allSolutions = await api.getTaskSolutionsByTask(taskId);
+                    const teamSolutions = allSolutions.filter(s => teamMembersMap.has(s.studentId));
+                    setSolutions(teamSolutions);
+                } else {
+                    setSolutions([]);
+                }
+                
+                const mySolutions = await api.getMyTaskSolutions();
+                const my = mySolutions.find(s => s.taskId === taskId);
+                setMySolution(my || null);
+            }
         } catch (err) {
             console.error('Failed to load solutions:', err);
-            setError('Ошибка загрузки решений');
         } finally {
             setLoading(false);
         }
     };
+
+
+
+    const postState = useTypedSelector(state => state.posts.selectedPost!) as Task; 
+
+    const [documents, setDocuments] = useState<File[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const [isInTeam, setIsInTeam] = useState<boolean>(false);
+    const [loadingTeamCheck, setLoadingTeamCheck] = useState(true);
+
+    useEffect(() => {
+        if (hasAnyRole([STUDENT])) {
+            checkStudentTeam();
+        }
+    }, [postState.id]);
+
+    const checkStudentTeam = async () => {
+        setLoadingTeamCheck(true);
+        try {
+            const studentTeam = await api.getMyTeamByTask(postState.id);
+            setIsInTeam(!!studentTeam);
+        } catch (err) {
+            setIsInTeam(false);
+        } finally {
+            setLoadingTeamCheck(false);
+        }
+    };
+
+    useEffect(() => {
+        loadData();
+    }, [taskId]);
+
+    // const loadData = async () => {
+    //     setLoading(true);
+    //     try {
+    //         const allSolutions = await api.getTaskSolutionsByTask(taskId);
+    //         setSolutions(allSolutions);
+
+    //         const mySolutions = await api.getMyTaskSolutions();
+    //         const my = mySolutions.find(s => s.taskId === taskId);
+    //         setMySolution(my || null);
+    //     } catch (err) {
+    //         console.error('Failed to load solutions:', err);
+    //         setError('Ошибка загрузки решений');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -135,14 +209,32 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                     )}
 
                     <div className="solutions-container">
-                        <h4>Все решения ({solutions.length})</h4>
+                        <h4>
+                            {isTeacher 
+                                ? `Все решения (${solutions.length})` 
+                                : `Решения моей команды (${solutions.length})`}
+                        </h4>
                         {solutions.length === 0 ? (
                             <p>Нет решений</p>
                         ) : (
                             solutions.map((solution) => (
                                 <div key={solution.id} className="solution-card">
+                                    {/* <div className="solution-header">
+                                        <strong>
+                                            {isTeacher 
+                                                ? `Студент: ${solution.studentId}` 
+                                                : solution.studentId}
+                                        </strong>
+                                        <span>{formatDate(solution.createdAt)}</span>
+                                    </div> */}
                                     <div className="solution-header">
-                                        <strong>Студент ID: {solution.studentId}</strong>
+                                        <strong>
+                                            {isTeacher 
+                                                ? `Студент ID: ${solution.studentId}`
+                                                : studentNames.get(solution.studentId) 
+                                                    ? `${studentNames.get(solution.studentId)?.surname} ${studentNames.get(solution.studentId)?.name}`
+                                                    : `ID: ${solution.studentId}`}
+                                        </strong>
                                         <span>{formatDate(solution.createdAt)}</span>
                                     </div>
                                     
@@ -154,15 +246,9 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                                         </div>
                                     ))}
                                     
-                                    {solution.mark !== undefined && (
+                                    {solution.mark !== undefined && solution.mark !== null && (
                                         <div className="solution-mark">
                                             Оценка: <strong>{solution.mark}</strong>
-                                        </div>
-                                    )}
-                                    
-                                    {isTeacher && !solution.mark && (
-                                        <div className="solution-actions">
-                                            <button>Оценить</button>
                                         </div>
                                     )}
                                 </div>

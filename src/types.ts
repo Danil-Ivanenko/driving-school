@@ -283,3 +283,8 @@ export interface InviteDto {
   inviterId: number; 
   inviterName: string;
 }
+
+export interface MarkResponse {
+    user: FullInfo;
+    mark: number;
+}
