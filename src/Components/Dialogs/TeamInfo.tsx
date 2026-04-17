@@ -15,6 +15,7 @@ import InviteStudentToTeamDialog from "./InviteStudentToTeamDialog";
 import TeamMarkDialog from "./TeamMarkDialog";
 import StudentMarkDialog from "./StudentMarkDialog";
 import DelelteOrMakeCapitanDialog from "./DelelteOrMakeCapitanDialog";
+import ReallocationOfMarksDialog from "./ReallocationOfMarksDialog";
 const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
     const postState = useTypedSelector(state => state.posts.selectedPost!); 
     const [isOpen, setOpen] = useState<boolean>(false);
@@ -150,13 +151,15 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
                     
                    
                 ))}
-
+                  
                 {!loadingMarks && teamMark !== null && (
+
                     <p className='baseP' style={{ marginTop: '10px', color: '#10b981' }}>
                         Оценка команды: {teamMark}
                     </p>
+                    
                 )}
-
+                 {hasAnyRole([STUDENT]) && team.mark != null &&<ReallocationOfMarksDialog team={team}/> }
                 {!loadingMarks && userMarks.size > 0 && (
                     <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '8px' }}>
                         <p className='baseP' style={{ fontWeight: 'bold' }}>Персональные оценки:</p>

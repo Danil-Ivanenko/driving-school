@@ -288,3 +288,8 @@ export interface MarkResponse {
     user: FullInfo;
     mark: number;
 }
+
+export interface MarkDistribution {
+    user : UserProfile,
+    mark : number
+}

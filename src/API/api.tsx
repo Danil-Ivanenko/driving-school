@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
@@ -7,7 +7,7 @@ import { MarkResponse, Team } from '../types';
 
 
 
-const baseURL ='http://localhost:8080/';
+const baseURL ='http://localhost:8081/';
 export const instance = axios.create({
     baseURL : baseURL
 });
@@ -1145,6 +1145,35 @@ async function MakeUserCapitan(teamId: string, userId : number) {
 }
 
 
+async function GetDistrbutionMarks(taskId : string ,teamId: string) {
+    try {
+          const { data } = await instance.get<MarkDistribution[]>(`api/mark/distribution/task/${taskId}/team/${teamId}`,  {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to set user mark:", e);
+        throw e;
+    }
+}
+
+async function DistrbuteMarks(taskId : string ,marks: {userId : number, mark: number}[]) {
+    try {
+          const { data } = await instance.post(`api/mark/task/${taskId}`, marks, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to set user mark:", e);
+        throw e;
+    }
+}
+
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -1221,5 +1250,7 @@ export const api = {
     getTaskTeams,
     getMyTeamByTask,
 
-    MakeUserCapitan : MakeUserCapitan
+    MakeUserCapitan : MakeUserCapitan,
+    GetDistrbutionMarks : GetDistrbutionMarks,
+    DistrbuteMarks : DistrbuteMarks
 }
