@@ -5,7 +5,7 @@ import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
 import { api } from '../API/api';
 import {GetChannelsThunk, SetSelectedChannelActionCreator} from '../reducers/channel-reducer'
-import {  Post, PostType, PostTypeTranslations, Task } from '../types';
+import {  Post, PostType, PostTypeTranslations, Task, Team } from '../types';
 
 import DeletePostDialog from './Dialogs/DeletePostDialog';
 import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../RoleChecker';
@@ -29,12 +29,33 @@ const CommandTaskInfo: React.FC = () => {
 
     const [isInTeam, setIsInTeam] = useState<boolean>(false);
     const [loadingTeamCheck, setLoadingTeamCheck] = useState(true);
+    const [myTeam, setMyTeam] = useState<Team | null>(null);
+
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     useEffect(() => {
         if (hasAnyRole([STUDENT])) {
             checkStudentTeam();
         }
     }, [postState.id]);
+
+    useEffect(() => {
+        const loadMyTeam = async () => {
+            if (hasAnyRole([STUDENT])) {
+                const team = await api.getMyTeamByTask(postState.id);
+                setMyTeam(team);
+            }
+        };
+        loadMyTeam();
+    }, [postState.id]);
+
+    useEffect(() => {
+        const loadCurrentUser = async () => {
+            const user = await api.GetMyProfile();
+            setCurrentUser(user);
+        };
+        loadCurrentUser();
+    }, []);
 
     const checkStudentTeam = async () => {
         setLoadingTeamCheck(true);
@@ -114,6 +135,22 @@ const CommandTaskInfo: React.FC = () => {
         dispatch(GetChannelsThunk());
     };
 
+    const refreshAfterTeamChange = async () => {
+        if (hasAnyRole([STUDENT])) {
+            const team = await api.getMyTeamByTask(postState.id);
+            setMyTeam(team);
+            setIsInTeam(!!team);
+            
+            const mySolutions = await api.getMyTaskSolutions();
+            const hasSolution = mySolutions.some(s => s.taskId === postState.id);
+            setMySolutionExists(hasSolution);
+        }
+        
+        dispatch(GetPostByIdThunk(postState.id, PostType.TEAM_TASK));
+
+        setShowTaskSolutionManager(false);
+    };
+
 
     const changeTaskRedistribute = async () => {
         if (hasAnyRole([MANAGER, TEACHER])) {
@@ -121,7 +158,7 @@ const CommandTaskInfo: React.FC = () => {
             await api.ChangeCommandTaskRedistribute(postState.id, !postState.isCanRedistribute);
             dispatch(GetPostByIdThunk(postState.id ,PostType.TEAM_TASK ))
         }
-        };
+    };
     return (
         
         <div className='containerCol' style={{ maxHeight: '100vh',   overflowY: 'auto'}}>
@@ -208,6 +245,8 @@ const CommandTaskInfo: React.FC = () => {
                             <TaskSolutionManager
                                 taskId={postState.id}
                                 taskType={postState.type}
+                                teamId={myTeam?.id}      
+                                isCaptain={myTeam?.captainId === currentUser?.id}
                                 isTeacher={hasAnyRole([MANAGER, TEACHER])}
                                 teams={postState.teams}
                                 onClose={() => {

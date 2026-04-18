@@ -32,6 +32,7 @@ const VoteForSolution: React.FC<VoteForSolutionProps> = ({
     const loadData = async () => {
     setLoading(true);
     try {
+
         const profile = await api.GetMyProfile();
         setCurrentUserId(profile?.id || null);
         
@@ -41,11 +42,10 @@ const VoteForSolution: React.FC<VoteForSolutionProps> = ({
         const teamMemberIds = new Set(myTeam?.users.map(u => u.id) || []);
         
         const teamSolutions = allSolutions.filter(solution => 
-            teamMemberIds.has(solution.studentId) && solution.studentId !== profile?.id
-        );
+            teamMemberIds.has(solution.studentId));
         setSolutions(teamSolutions);
         
-        const results = await api.getVotingResults(taskId);
+        const results = await api.getVotingResults(taskId, teamId);
         
         const teamSolutionIds = new Set(teamSolutions.map(s => s.id));
         const filteredResults = {
@@ -59,6 +59,10 @@ const VoteForSolution: React.FC<VoteForSolutionProps> = ({
             setMyVote(myVoteData.solutionId);
             setSelectedSolutionId(myVoteData.solutionId);
         }
+
+        setCurrentUserId(profile?.id || null);
+        
+        setSolutions(teamSolutions);
     } catch (err) {
         console.error('Failed to load voting data:', err);
     } finally {

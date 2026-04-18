@@ -856,9 +856,9 @@ async function getMyVote(taskId: string): Promise<SolutionVoteDto | null> {
     }
 }
 
-async function getVotingResults(taskId: string): Promise<VotingResultsDto> {
+async function getVotingResults(taskId: string, teamId: string): Promise<VotingResultsDto> {
     try {
-        const { data } = await instance.get<VotingResultsDto>(`api/task-solutions/${taskId}/voting-results`, {
+        const { data } = await instance.get<VotingResultsDto>(`api/task-solutions/${taskId}/team/${teamId}/voting-results`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }
@@ -871,9 +871,9 @@ async function getVotingResults(taskId: string): Promise<VotingResultsDto> {
 }
 
 
-async function getSelectedSolution(taskId: string): Promise<TaskSolutionDto | null> {
+async function getSelectedSolution(taskId: string, teamId?: string): Promise<TaskSolutionDto | null> {
     try {
-        const { data } = await instance.get<TaskSolutionDto>(`api/task-solutions/${taskId}/selected-solution`, {
+        const { data } = await instance.get<TaskSolutionDto>(`api/task-solutions/${taskId}/team/${teamId}/selected-solution`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }
@@ -884,24 +884,37 @@ async function getSelectedSolution(taskId: string): Promise<TaskSolutionDto | nu
     }
 }
 
-
-async function selectAcceptedSolution(taskId: string): Promise<TaskSolutionDto> {
+async function getSelectedSolutions(taskId: string): Promise<TaskSolutionDto[]> {
     try {
-        const { data } = await instance.post<TaskSolutionDto>(
-            `api/task-solutions/${taskId}/select-accepted`,
-            {},
-            {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
+        const { data } = await instance.get<TaskSolutionDto[]>(`api/task-solutions/${taskId}/selected-solutions`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
             }
-        );
-        return data;
+        });
+        return data || [];
     } catch (e) {
-        console.error("Failed to select accepted solution:", e);
-        throw e;
+        return [];
     }
 }
+
+
+// async function selectAcceptedSolution(taskId: string, teamId: string): Promise<TaskSolutionDto> {
+//     try {
+//         const { data } = await instance.post<TaskSolutionDto>(
+//             `api/task-solutions/${taskId}/team/${teamId}/select-accepted`,
+//             {},
+//             {
+//                 headers: {
+//                     Authorization: `Bearer ${localStorage.getItem('token')}`
+//                 }
+//             }
+//         );
+//         return data;
+//     } catch (e) {
+//         console.error("Failed to select accepted solution:", e);
+//         throw e;
+//     }
+// }
 
 
 async function ChangeCommandTaskRedistribute( taskId :string, isCanRedistribute : boolean)   { 
@@ -1244,7 +1257,6 @@ export const api = {
     getMyVote,
     getSelectedSolution,
     getVotingResults,
-    selectAcceptedSolution,
 
     ChangeCommandTaskRedistribute : ChangeCommandTaskRedistribute,
     GetStudentsWithOutTeam : GetStudentsWithOutTeam,
@@ -1266,5 +1278,6 @@ export const api = {
     GetDistrbutionMarks : GetDistrbutionMarks,
     DistrbuteMarks : DistrbuteMarks,
 
-    getTeam
+    getTeam,
+    getSelectedSolutions
 }

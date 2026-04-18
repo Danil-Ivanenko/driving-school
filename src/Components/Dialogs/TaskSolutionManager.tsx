@@ -37,6 +37,9 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
     const [loading, setLoading] = useState(true);
     const [studentNames, setStudentNames] = useState<Map<number, { name: string; surname: string }>>(new Map());
 
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+    const postState = useTypedSelector(state => state.posts.selectedPost!) as Task; 
+
     useEffect(() => {
         loadData();
     }, [taskId]);
@@ -49,6 +52,7 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                 setSolutions(allSolutions);
                 await loadTeamNames(allSolutions);
             } else {
+
                 const myTeam = await api.getMyTeamByTask(taskId);
                 
                 if (myTeam) {
@@ -80,9 +84,6 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
     };
 
 
-
-    const postState = useTypedSelector(state => state.posts.selectedPost!) as Task; 
-
     const [documents, setDocuments] = useState<File[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -96,10 +97,58 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
     const [viewMode, setViewMode] = useState<'all' | 'selected'>('all');
     const [selectedSolution, setSelectedSolution] = useState<TaskSolutionDto | null>(null); 
     const [isSelecting, setIsSelecting] = useState(false); 
+    const [selectedSolutions, setSelectedSolutions] = useState<TaskSolutionDto[]>([]);
 
-    const loadSelectedSolution = async () => {
+    useEffect(() => {
+        loadData();
+        if (!isTeacher && teamId) {
+            refreshTeamData();
+        }
+    }, [taskId, teamId]);
+
+
+    const refreshTeamData = async () => {
         try {
-            const solution = await api.getSelectedSolution(taskId);
+            const myTeam = await api.getMyTeamByTask(taskId);
+            if (myTeam) {
+                const teamMembersMap = new Map();
+                myTeam.users.forEach(user => {
+                    teamMembersMap.set(user.id, { 
+                        name: user.name, 
+                        surname: user.surname 
+                    });
+                });
+                setStudentNames(teamMembersMap);
+                
+                const allSolutions = await api.getTaskSolutionsByTask(taskId);
+                const teamSolutions = allSolutions.filter(s => teamMembersMap.has(s.studentId));
+                setSolutions(teamSolutions);
+            }
+        } catch (err) {
+            console.error('Failed to refresh team data:', err);
+        }
+    };
+
+    const loadSelectedSolutions = async () => {
+        if (!isTeacher) return;
+        
+        console.log('Loading selected solutions for taskId:', taskId);
+        
+        try {
+            const solutions = await api.getSelectedSolutions(taskId);
+            console.log('Received selected solutions:', solutions);
+            setSelectedSolutions(Array.isArray(solutions) ? solutions : []);
+        } catch (err) {
+            console.error('Failed to load selected solutions:', err);
+            setSelectedSolutions([]);
+        }
+    };
+
+    const loadSelectedSolutionForStudent = async () => {
+        if (!teamId) return;
+        
+        try {
+            const solution = await api.getSelectedSolution(taskId, teamId);
             setSelectedSolution(solution);
         } catch (err) {
             console.error('Failed to load selected solution:', err);
@@ -107,21 +156,15 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
         }
     };
 
-    const handleSelectAccepted = async () => {
-        setIsSelecting(true);
-        try {
-            const selected = await api.selectAcceptedSolution(taskId);
-            setSelectedSolution(selected);
-            alert(`Выбрано решение от ${new Date(selected.createdAt).toLocaleString()}`);
-            await loadData();
-            await loadSelectedSolution(); 
-        } catch (err) {
-            console.error('Failed to select solution:', err);
-            alert('Ошибка при выборе решения');
-        } finally {
-            setIsSelecting(false);
-        }
-    };
+    // const loadSelectedSolution = async () => {
+    //     try {
+    //         const solution = await api.getSelectedSolution(taskId, teamId);
+    //         setSelectedSolution(solution);
+    //     } catch (err) {
+    //         console.error('Failed to load selected solution:', err);
+    //         setSelectedSolution(null);
+    //     }
+    // };
 
     const loadTeamNames = async (solutionsList: TaskSolutionDto[]) => {
         const teamNamesMap = new Map<string, string>();
@@ -243,6 +286,17 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
         }
     };
 
+    const handleViewModeChange = (mode: 'all' | 'selected') => {
+        setViewMode(mode);
+        if (mode === 'selected') {
+            if (isTeacher) {
+                loadSelectedSolutions();
+            } else {
+                loadSelectedSolutionForStudent();
+            }
+        }
+    };
+
     const showVoting = () => {
         return taskType === 'DEMOCRATIC' || taskType === 'QUALIFIED';
     };
@@ -259,7 +313,7 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                 <div>Загрузка...</div>
             ) : (
                 <>
-                    {isTeacher && (
+                    {/* {isTeacher && (
                         <div style={{ 
                             display: 'flex', 
                             gap: '10px', 
@@ -280,7 +334,7 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                             >
                                 Все решения ({solutions.length})
                             </button>
-                            {/* <button
+                            <button
                                 onClick={() => {
                                     setViewMode('selected');
                                     loadSelectedSolution();
@@ -294,8 +348,44 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                                     cursor: 'pointer'
                                 }}
                             >
-                                Выбранное решение
-                            </button> */}
+                                Выбранные решения
+                            </button>
+                        </div>
+                    )} */}
+                    {isTeacher && (
+                        <div style={{ 
+                            display: 'flex', 
+                            gap: '10px', 
+                            padding: '10px 20px',
+                            borderBottom: '1px solid #e5e7eb',
+                            background: '#f9fafb'
+                        }}>
+                            <button
+                                onClick={() => handleViewModeChange('all')}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: viewMode === 'all' ? '#3b82f6' : '#e5e7eb',
+                                    color: viewMode === 'all' ? 'white' : '#333',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Все решения ({solutions.length})
+                            </button>
+                            <button
+                                onClick={() => handleViewModeChange('selected')}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: viewMode === 'selected' ? '#3b82f6' : '#e5e7eb',
+                                    color: viewMode === 'selected' ? 'white' : '#333',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Выбранные решения
+                            </button>
                         </div>
                     )}
 
@@ -342,7 +432,7 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                                                 fontSize: '12px',
                                                 textAlign: 'center'
                                             }}>
-                                                ✅ ВЫБРАННОЕ РЕШЕНИЕ
+                                                ВЫБРАННОЕ РЕШЕНИЕ
                                             </div>
                                         )}
                                     </div>
@@ -350,7 +440,7 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                             )}
                         </div>
                     )}
-                    {viewMode === 'selected' && (
+                    {/* {viewMode === 'selected' && (
                         <div className="solutions-container">
                             <h4>Выбранное решение</h4>
                             {!selectedSolution ? (
@@ -380,27 +470,73 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                                 </div>
                             )}
                         </div>
+                    )} */}
+                    {viewMode === 'selected' && (
+                        <div className="solutions-container">
+                            <h4>
+                                {isTeacher 
+                                    ? `Выбранные решения по командам (${selectedSolutions.length})` 
+                                    : 'Выбранное решение'}
+                            </h4>
+                            
+                            {selectedSolutions.length === 0 && !selectedSolution ? (
+                                <p>Нет выбранных решений.</p>
+                            ) : isTeacher ? (
+                                selectedSolutions.map((solution) => (
+                                    <div key={solution.id} className="solution-card" style={{ border: '2px solid #10b981', marginBottom: '16px' }}>
+                                        <div className="solution-header">
+                                            <strong>
+                                                Команда: {getTeamNameByStudentId(solution.studentId)}
+                                            </strong>
+                                            <span>{formatDate(solution.createdAt)}</span>
+                                        </div>
+                                        
+                                        {solution.documents?.map((doc, idx) => (
+                                            <div key={idx} className="solution-file">
+                                                <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
+                                                    📎 {doc.fileName}
+                                                </a>
+                                            </div>
+                                        ))}
+                                        
+                                        {solution.mark !== undefined && solution.mark !== null && (
+                                            <div className="solution-mark">
+                                                Оценка: <strong>{solution.mark}</strong>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                selectedSolution && (
+                                    <div className="solution-card" style={{ border: '2px solid #10b981' }}>
+                                        <div className="solution-header">
+                                            <strong>
+                                                Команда: {getTeamNameByStudentId(selectedSolution.studentId)}
+                                            </strong>
+                                            <span>{formatDate(selectedSolution.createdAt)}</span>
+                                        </div>
+                                        
+                                        {selectedSolution.documents?.map((doc, idx) => (
+                                            <div key={idx} className="solution-file">
+                                                <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
+                                                    📎 {doc.fileName}
+                                                </a>
+                                            </div>
+                                        ))}
+                                        
+                                        {selectedSolution.mark !== undefined && selectedSolution.mark !== null && (
+                                            <div className="solution-mark">
+                                                Оценка: <strong>{selectedSolution.mark}</strong>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            )}
+                        </div>
                     )}
 
                     {!isTeacher && (
                         <>
-                            {/* <div style={{ marginBottom: '20px', padding: '0 20px' }}>
-                                <button
-                                    onClick={handleSelectAccepted}
-                                    disabled={isSelecting}
-                                    style={{
-                                        padding: '8px 16px',
-                                        background: '#10b981',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        marginRight: 'auto'
-                                    }}
-                                >
-                                    {isSelecting ? 'Выбор...' : 'Автовыбор'}
-                                </button>
-                            </div> */}
                             {showVoting() && solutions.length > 0 && (
                                 <div style={{ marginBottom: '20px', padding: '0 20px' }}>
                                     <button 
@@ -451,47 +587,6 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                             )}
                         </>
                     )}
-
-                    {/* <div className="solutions-container">
-                        <h4>
-                            {isTeacher 
-                                ? `Все решения (${solutions.length})` 
-                                : `Решения моей команды (${solutions.length})`}
-                        </h4>
-                        {solutions.length === 0 ? (
-                            <p>Нет решений</p>
-                        ) : (
-                            solutions.map((solution) => (
-                                <div key={solution.id} className="solution-card">
-                                    <div className="solution-header">
-                                        <strong>
-                                            {isTeacher 
-                                                ? `Команда: ${getTeamNameByStudentId(solution.studentId)}`
-                                                : studentNames.get(solution.studentId) 
-                                                    ? `${studentNames.get(solution.studentId)?.surname} ${studentNames.get(solution.studentId)?.name}`
-                                                    : `ID: ${solution.studentId}`}
-                                        </strong>
-
-                                        <span>{formatDate(solution.createdAt)}</span>
-                                    </div>
-                                    
-                                    {solution.documents?.map((doc, idx) => (
-                                        <div key={idx} className="solution-file">
-                                            <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
-                                                📎 {doc.fileName}
-                                            </a>
-                                        </div>
-                                    ))}
-                                    
-                                    {solution.mark !== undefined && solution.mark !== null && (
-                                        <div className="solution-mark">
-                                            Оценка: <strong>{solution.mark}</strong>
-                                        </div>
-                                    )}
-                                </div>
-                            ))
-                        )}
-                    </div> */}
                 </>
             )}
 
@@ -499,6 +594,7 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                 <VoteForSolution
                     taskId={taskId}
                     teamId={teamId || ''}
+                    teams={teams}   
                     onClose={() => setShowVotingDialog(false)}
                     onVoteComplete={() => {
                         setShowVotingDialog(false);
