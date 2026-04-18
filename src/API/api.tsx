@@ -818,7 +818,8 @@ async function voteForSolution(taskId: string, solutionId: string): Promise<Solu
             { taskId, solutionId },
             {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
                 }
             }
         );
@@ -828,7 +829,6 @@ async function voteForSolution(taskId: string, solutionId: string): Promise<Solu
         throw e;
     }
 }
-
 
 async function cancelVote(taskId: string): Promise<void> {
     try {
@@ -843,7 +843,6 @@ async function cancelVote(taskId: string): Promise<void> {
     }
 }
 
-
 async function getMyVote(taskId: string): Promise<SolutionVoteDto | null> {
     try {
         const { data } = await instance.get<SolutionVoteDto>(`api/task-solutions/vote/my/${taskId}`, {
@@ -853,8 +852,21 @@ async function getMyVote(taskId: string): Promise<SolutionVoteDto | null> {
         });
         return data;
     } catch (e) {
-
         return null;
+    }
+}
+
+async function getVotingResults(taskId: string): Promise<VotingResultsDto> {
+    try {
+        const { data } = await instance.get<VotingResultsDto>(`api/task-solutions/${taskId}/voting-results`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch voting results:", e);
+        throw e;
     }
 }
 
@@ -869,21 +881,6 @@ async function getSelectedSolution(taskId: string): Promise<TaskSolutionDto | nu
         return data;
     } catch (e) {
         return null;
-    }
-}
-
-
-async function getVotingResults(taskId: string): Promise<VotingResultsDto> {
-    try {
-        const { data } = await instance.get<VotingResultsDto>(`api/task-solutions/${taskId}/voting-results`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        return data;
-    } catch (e) {
-        console.error("Failed to fetch voting results:", e);
-        throw e;
     }
 }
 
@@ -1173,6 +1170,21 @@ async function DistrbuteMarks(taskId : string ,marks: {userId : number, mark: nu
     }
 }
 
+async function getTeam(teamId: string): Promise<Team | null> {
+    try {
+        const { data } = await instance.get<Team>(`api/teams/${teamId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch team:", e);
+        return null;
+    }
+}
+
+
 
 export const api = {
     login : login,
@@ -1252,5 +1264,7 @@ export const api = {
 
     MakeUserCapitan : MakeUserCapitan,
     GetDistrbutionMarks : GetDistrbutionMarks,
-    DistrbuteMarks : DistrbuteMarks
+    DistrbuteMarks : DistrbuteMarks,
+
+    getTeam
 }

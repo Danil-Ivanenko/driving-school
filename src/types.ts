@@ -223,6 +223,7 @@ export interface TaskSolutionDto {
     id: string;
     taskId: string;
     studentId: number;
+    teamId: string;
     documents: TaskDocumentDto[];
     mark?: number;
     createdAt: string;
@@ -293,3 +294,5 @@ export interface MarkDistribution {
     user : UserProfile,
     mark : number
 }
+
+export type TaskSolutionType = 'LAST' | 'FIRST' | 'CAPITAN' | 'DEMOCRATIC' | 'QUALIFIED';

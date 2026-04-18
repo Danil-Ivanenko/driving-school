@@ -65,6 +65,7 @@ const CreateUserDialog: React.FC = () => {
         setPhone(event.target.value);
         setError('');
     };
+    localStorage.getItem('token')
 
 
     const handleRoleToggle = (role: UserRole) => {

@@ -1,21 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../API/api';
 import { useTypedSelector } from '../../store';
-import { Post, PostType, PostTypeTranslations, Task } from '../../types';
+import { Post, PostType, PostTypeTranslations, Task, Team } from '../../types';
 import { TaskSolutionDto } from '../../types';
 import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../../RoleChecker';
+import VoteForSolution from './VoteForSolution';
 require('../../css/solution.css');
 
 
 interface TaskSolutionManagerProps {
     taskId: string;
+    taskType?: string;
+    teamId?: string;
+    isCaptain?: boolean;
     isTeacher?: boolean;
+    teams?: Team[];
     onClose: () => void;
 }
 
 const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({ 
-    taskId, 
-    isTeacher = false, 
+    // taskId, 
+    // isTeacher = false, 
+    // onClose 
+    taskId,
+    taskType = 'FIRST',
+    teamId,
+    isCaptain = false,
+    isTeacher = false,
+    teams = [],
     onClose 
 }) => {
     const [solutions, setSolutions] = useState<TaskSolutionDto[]>([]);
@@ -35,6 +47,7 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
             if (isTeacher) {
                 const allSolutions = await api.getTaskSolutionsByTask(taskId);
                 setSolutions(allSolutions);
+                await loadTeamNames(allSolutions);
             } else {
                 const myTeam = await api.getMyTeamByTask(taskId);
                 
@@ -76,6 +89,71 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
 
     const [isInTeam, setIsInTeam] = useState<boolean>(false);
     const [loadingTeamCheck, setLoadingTeamCheck] = useState(true);
+    const [mySolutionExists, setMySolutionExists] = useState(false);
+
+    const [teamNames, setTeamNames] = useState<Map<string, string>>(new Map());
+
+    const [viewMode, setViewMode] = useState<'all' | 'selected'>('all');
+    const [selectedSolution, setSelectedSolution] = useState<TaskSolutionDto | null>(null); 
+    const [isSelecting, setIsSelecting] = useState(false); 
+
+    const loadSelectedSolution = async () => {
+        try {
+            const solution = await api.getSelectedSolution(taskId);
+            setSelectedSolution(solution);
+        } catch (err) {
+            console.error('Failed to load selected solution:', err);
+            setSelectedSolution(null);
+        }
+    };
+
+    const handleSelectAccepted = async () => {
+        setIsSelecting(true);
+        try {
+            const selected = await api.selectAcceptedSolution(taskId);
+            setSelectedSolution(selected);
+            alert(`Выбрано решение от ${new Date(selected.createdAt).toLocaleString()}`);
+            await loadData();
+            await loadSelectedSolution(); 
+        } catch (err) {
+            console.error('Failed to select solution:', err);
+            alert('Ошибка при выборе решения');
+        } finally {
+            setIsSelecting(false);
+        }
+    };
+
+    const loadTeamNames = async (solutionsList: TaskSolutionDto[]) => {
+        const teamNamesMap = new Map<string, string>();
+        
+        const uniqueTeamIds = Array.from(new Set(solutionsList.map(s => s.teamId).filter(Boolean)));
+        
+        for (const teamId of uniqueTeamIds) {
+            if (teamId) {
+                try {
+                    const team = await api.getTeam(teamId);
+                    if (team) {
+                        teamNamesMap.set(teamId, team.name);
+                    }
+                } catch (err) {
+                    console.error(`Failed to load team ${teamId}:`, err);
+                    teamNamesMap.set(teamId, `Команда ${teamId.slice(0, 8)}`);
+                }
+            }
+        }
+        
+        setTeamNames(teamNamesMap);
+    };
+
+    const getTeamNameByStudentId = (studentId: number): string => {
+        if (!teams || teams.length === 0) return `Студент ID: ${studentId}`;
+        
+        const team = teams.find(t => 
+            t.users?.some(user => user.id === studentId)
+        );
+        
+        return team ? team.name : `Студент ID: ${studentId}`;
+    };
 
     useEffect(() => {
         if (hasAnyRole([STUDENT])) {
@@ -99,22 +177,6 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
         loadData();
     }, [taskId]);
 
-    // const loadData = async () => {
-    //     setLoading(true);
-    //     try {
-    //         const allSolutions = await api.getTaskSolutionsByTask(taskId);
-    //         setSolutions(allSolutions);
-
-    //         const mySolutions = await api.getMyTaskSolutions();
-    //         const my = mySolutions.find(s => s.taskId === taskId);
-    //         setMySolution(my || null);
-    //     } catch (err) {
-    //         console.error('Failed to load solutions:', err);
-    //         setError('Ошибка загрузки решений');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -166,6 +228,26 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
         return new Date(dateString).toLocaleString('ru-RU');
     };
 
+    const canStudentSubmit = () => {
+        if (isTeacher) return true;
+        
+        switch (taskType) {
+            case 'CAPITAN':
+                return isCaptain;
+            case 'FIRST':
+                return !mySolutionExists;
+            case 'LAST':
+                return true; 
+            default:
+                return true;
+        }
+    };
+
+    const showVoting = () => {
+        return taskType === 'DEMOCRATIC' || taskType === 'QUALIFIED';
+    };
+    const [showVotingDialog, setShowVotingDialog] = useState(false);
+
     return (
         <div className="solutions-list">
             <div className="modal-header">
@@ -177,38 +259,200 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                 <div>Загрузка...</div>
             ) : (
                 <>
-                    {!isTeacher && (
-                        <div className="solution-form">
-                            <h4>{mySolution ? 'Редактировать решение' : 'Отправить решение'}</h4>
-                            <div>
-                                <label>Документы:</label>
-                                <input 
-                                    type="file" 
-                                    multiple 
-                                    onChange={handleFileChange}
-                                    accept=".pdf,.doc,.docx,.jpg,.png"
-                                />
-                                {mySolution?.documents?.map(doc => (
-                                    <p key={doc.fileUrl}>
-                                        Текущий файл: {doc.fileName}
-                                    </p>
-                                ))}
-                            </div>
-                            {error && <div className="error">{error}</div>}
-                            <div className="form-buttons">
-                                <button onClick={handleSubmit} disabled={isSubmitting}>
-                                    {isSubmitting ? 'Отправка...' : (mySolution ? 'Обновить' : 'Отправить')}
-                                </button>
-                                {mySolution && (
-                                    <button onClick={handleDelete} disabled={isSubmitting}>
-                                        Удалить
-                                    </button>
-                                )}
-                            </div>
+                    {isTeacher && (
+                        <div style={{ 
+                            display: 'flex', 
+                            gap: '10px', 
+                            padding: '10px 20px',
+                            borderBottom: '1px solid #e5e7eb',
+                            background: '#f9fafb'
+                        }}>
+                            <button
+                                onClick={() => setViewMode('all')}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: viewMode === 'all' ? '#3b82f6' : '#e5e7eb',
+                                    color: viewMode === 'all' ? 'white' : '#333',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Все решения ({solutions.length})
+                            </button>
+                            {/* <button
+                                onClick={() => {
+                                    setViewMode('selected');
+                                    loadSelectedSolution();
+                                }}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: viewMode === 'selected' ? '#3b82f6' : '#e5e7eb',
+                                    color: viewMode === 'selected' ? 'white' : '#333',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Выбранное решение
+                            </button> */}
                         </div>
                     )}
 
-                    <div className="solutions-container">
+                    {viewMode === 'all' && (
+                        <div className="solutions-container">
+                            <h4>Все решения ({solutions.length})</h4>
+                            {solutions.length === 0 ? (
+                                <p>Нет решений</p>
+                            ) : (
+                                solutions.map((solution) => (
+                                    <div key={solution.id} className="solution-card">
+                                        <div className="solution-header">
+                                            <strong>
+                                                {isTeacher 
+                                                    ? `Команда: ${getTeamNameByStudentId(solution.studentId)}`
+                                                    : studentNames.get(solution.studentId) 
+                                                        ? `${studentNames.get(solution.studentId)?.surname} ${studentNames.get(solution.studentId)?.name}`
+                                                        : `ID: ${solution.studentId}`}
+                                            </strong>
+                                            <span>{formatDate(solution.createdAt)}</span>
+                                        </div>
+                                        
+                                        {solution.documents?.map((doc, idx) => (
+                                            <div key={idx} className="solution-file">
+                                                <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
+                                                    📎 {doc.fileName}
+                                                </a>
+                                            </div>
+                                        ))}
+                                        
+                                        {solution.mark !== undefined && solution.mark !== null && (
+                                            <div className="solution-mark">
+                                                Оценка: <strong>{solution.mark}</strong>
+                                            </div>
+                                        )}
+                                        
+                                        {selectedSolution?.id === solution.id && (
+                                            <div style={{ 
+                                                marginTop: '8px', 
+                                                padding: '4px 8px', 
+                                                background: '#d1fae5', 
+                                                color: '#065f46',
+                                                borderRadius: '4px',
+                                                fontSize: '12px',
+                                                textAlign: 'center'
+                                            }}>
+                                                ✅ ВЫБРАННОЕ РЕШЕНИЕ
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                    {viewMode === 'selected' && (
+                        <div className="solutions-container">
+                            <h4>Выбранное решение</h4>
+                            {!selectedSolution ? (
+                                <p>Нет выбранных решений.</p>
+                            ) : (
+                                <div className="solution-card" style={{ border: '2px solid #10b981' }}>
+                                    <div className="solution-header">
+                                        <strong>
+                                            Команда: {getTeamNameByStudentId(selectedSolution.studentId)}
+                                        </strong>
+                                        <span>{formatDate(selectedSolution.createdAt)}</span>
+                                    </div>
+                                    
+                                    {selectedSolution.documents?.map((doc, idx) => (
+                                        <div key={idx} className="solution-file">
+                                            <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
+                                                📎 {doc.fileName}
+                                            </a>
+                                        </div>
+                                    ))}
+                                    
+                                    {selectedSolution.mark !== undefined && selectedSolution.mark !== null && (
+                                        <div className="solution-mark">
+                                            Оценка: <strong>{selectedSolution.mark}</strong>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {!isTeacher && (
+                        <>
+                            {/* <div style={{ marginBottom: '20px', padding: '0 20px' }}>
+                                <button
+                                    onClick={handleSelectAccepted}
+                                    disabled={isSelecting}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: '#10b981',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        marginRight: 'auto'
+                                    }}
+                                >
+                                    {isSelecting ? 'Выбор...' : 'Автовыбор'}
+                                </button>
+                            </div> */}
+                            {showVoting() && solutions.length > 0 && (
+                                <div style={{ marginBottom: '20px', padding: '0 20px' }}>
+                                    <button 
+                                        onClick={() => setShowVotingDialog(true)}
+                                        style={{ padding: '8px 16px', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                                    >
+                                        Проголосовать за решение
+                                    </button>
+                                </div>
+                            )}
+                            
+                            {canStudentSubmit() ? (
+                                <div className="solution-form">
+                                    <h4>{mySolution ? 'Редактировать решение' : 'Отправить решение'}</h4>
+                                    <div>
+                                        <label>Документы:</label>
+                                        <input 
+                                            type="file" 
+                                            multiple 
+                                            onChange={handleFileChange}
+                                            accept=".pdf,.doc,.docx,.jpg,.png"
+                                        />
+                                        {mySolution?.documents?.map(doc => (
+                                            <p key={doc.fileUrl}>
+                                                Текущий файл: {doc.fileName}
+                                            </p>
+                                        ))}
+                                    </div>
+                                    {error && <div className="error">{error}</div>}
+                                    <div className="form-buttons">
+                                        <button onClick={handleSubmit} disabled={isSubmitting}>
+                                            {isSubmitting ? 'Отправка...' : (mySolution ? 'Обновить' : 'Отправить')}
+                                        </button>
+                                        {mySolution && (
+                                            <button onClick={handleDelete} disabled={isSubmitting}>
+                                                Удалить
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div style={{ padding: '16px', margin: '0 20px 20px 20px', background: '#fee2e2', borderRadius: '8px', textAlign: 'center' }}>
+                                    {taskType === 'CAPITAN' && 'Только капитан команды может отправлять решение'}
+                                    {taskType === 'FIRST' && 'Решение уже было отправлено. Первое решение будет проверено.'}
+                                    {taskType === 'LAST' && 'Ожидается последнее решение команды'}
+                                    {!taskType && 'Вы не можете отправить решение'}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* <div className="solutions-container">
                         <h4>
                             {isTeacher 
                                 ? `Все решения (${solutions.length})` 
@@ -219,22 +463,15 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                         ) : (
                             solutions.map((solution) => (
                                 <div key={solution.id} className="solution-card">
-                                    {/* <div className="solution-header">
-                                        <strong>
-                                            {isTeacher 
-                                                ? `Студент: ${solution.studentId}` 
-                                                : solution.studentId}
-                                        </strong>
-                                        <span>{formatDate(solution.createdAt)}</span>
-                                    </div> */}
                                     <div className="solution-header">
                                         <strong>
                                             {isTeacher 
-                                                ? `Студент ID: ${solution.studentId}`
+                                                ? `Команда: ${getTeamNameByStudentId(solution.studentId)}`
                                                 : studentNames.get(solution.studentId) 
                                                     ? `${studentNames.get(solution.studentId)?.surname} ${studentNames.get(solution.studentId)?.name}`
                                                     : `ID: ${solution.studentId}`}
                                         </strong>
+
                                         <span>{formatDate(solution.createdAt)}</span>
                                     </div>
                                     
@@ -254,11 +491,24 @@ const TaskSolutionManager: React.FC<TaskSolutionManagerProps> = ({
                                 </div>
                             ))
                         )}
-                    </div>
+                    </div> */}
                 </>
+            )}
+
+            {showVotingDialog && (
+                <VoteForSolution
+                    taskId={taskId}
+                    teamId={teamId || ''}
+                    onClose={() => setShowVotingDialog(false)}
+                    onVoteComplete={() => {
+                        setShowVotingDialog(false);
+                        loadData();
+                    }}
+                />
             )}
         </div>
     );
+
 };
 
 export default TaskSolutionManager;

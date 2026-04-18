@@ -207,7 +207,9 @@ const CommandTaskInfo: React.FC = () => {
                         <div className="modal-content large">
                             <TaskSolutionManager
                                 taskId={postState.id}
+                                taskType={postState.type}
                                 isTeacher={hasAnyRole([MANAGER, TEACHER])}
+                                teams={postState.teams}
                                 onClose={() => {
                                     setShowTaskSolutionManager(false);
                                     refreshData();
