@@ -5,11 +5,11 @@ import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducer
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
 import { GetPostByIdThunk } from "../../reducers/posts-reducer";
-import { Post, Task } from "../../types";
+import { MetricTranslations, MetricWithValuesDto, Post, Task } from "../../types";
 const SendTaskDialog: React.FC = () => {
     const postState = useTypedSelector(state => state.posts.selectedPost!) as Post; 
     const [isOpen, setOpen] = useState<boolean>(false);
-
+    const [metricsValues, setMetricsValues] = useState<MetricWithValuesDto[]>([]);
     const [text, setText] = useState<string>("");
     const [file, setFile] = useState<File| null>(null);
     const [fileName, setFileName] = useState<string>( "");
@@ -70,12 +70,17 @@ const SendTaskDialog: React.FC = () => {
         dispatch(GetPostByIdThunk(postState.id, postState.type))
         setOpen(false)
     }
-
+    const openDialog = async () => {
+        const userId = Number(localStorage.getItem('id'));
+        const metricValues = await api.getPostMetricValue(postState.id, userId)
+        setMetricsValues(metricValues)
+        setOpen(true)
+    }
 
 
     return(
         <>
-            <button  className="course-block" onClick={() => setOpen(true)}>
+            <button  className="course-block" onClick={openDialog}>
                {postState?.studentSolution == null ? "Ответ" : `Ваш ответ ${postState?.studentSolution?.mark || ""}` }
             </button>
 
@@ -103,7 +108,22 @@ const SendTaskDialog: React.FC = () => {
                             </div>
                             )
                         }
+                        
+                        <p  style={{fontSize :"20px", margin :"0px"}} >Критерии</p>
+                        {metricsValues.map(metricVal => 
+                            (
+                                <div key={metricVal.metric.id}>
+                                    
+                                    
+                                    <div>
+                                        <p  className="baseHeader">{metricVal.metric.name}, тип:  {MetricTranslations[metricVal.metric.type]}, min: {metricVal.metric.minValue}, max: {metricVal.metric.maxValue}</p>
+                                        <p className="baseHeader"> значение: {metricVal.values[0].value} </p>
+                                        <hr></hr>
+                                    </div>
 
+                                </div>
+                            )
+                        )}
 
         
                         <div style={{display : "flex", justifyContent : "flex-end", gap :"5px"}} >

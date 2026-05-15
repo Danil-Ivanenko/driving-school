@@ -18,6 +18,7 @@ export type Channel = {
 export enum PostType{
     TASK = "TASK",  
     NEWS = "NEWS",
+    CONTROL = "CONTROL",
     TEAM_TASK = "TEAM_TASK"
 }
 
@@ -128,7 +129,8 @@ export enum CommandSolutionType{
 export const PostTypeTranslations: Record<PostType, string> = {
     [PostType.TASK]: "Задача",
     [PostType.NEWS]: "Новость",
-    [PostType.TEAM_TASK]: "Командное задание"
+    [PostType.TEAM_TASK]: "Командное задание",
+    [PostType.CONTROL] : "Контрольная"
 };
 
 export type UserRole = 'STUDENT' | 'TEACHER' | 'MANAGER';
@@ -137,6 +139,18 @@ export const ROLES = {
     STUDENT: 'STUDENT' as UserRole,
     TEACHER: 'TEACHER' as UserRole,
     MANAGER: 'MANAGER' as UserRole
+};
+
+export enum MetricType{
+    MARK = "MARK",  
+    COEFFICIENT = "COEFFICIENT",
+    CONSTRAINT  = "CONSTRAINT "
+}
+
+export const MetricTranslations: Record<MetricType, string> = {
+    [MetricType.MARK]: "Оценка",
+    [MetricType.COEFFICIENT]: "Коэффициент",
+    [MetricType.CONSTRAINT]: "Ограничение"
 };
 
 export interface FullInfo {
@@ -294,5 +308,46 @@ export interface MarkDistribution {
     user : UserProfile,
     mark : number
 }
+export type CreateMetricDTO ={
+    name: string,
+    comment: string,
+    minValue: number,
+    maxValue: number,
+    type: MetricType,
+    isVisibleToStudents: boolean,
+    isValuesVisibleToStudents: boolean,
+    postId : string | null,
+    taslkId : string | null
+}
 
+export type MetricDTO ={
+    id : string
+    name: string,
+    comment: string,
+    minValue: number,
+    maxValue: number,
+    type: MetricType,
+    isVisibleToStudents: boolean,
+    isValuesVisibleToStudents: boolean,
+    postId : string | null,
+    taslkId : string | null
+}
+export type MetricValueDto ={
+    userId : string,
+    value : number
+}
+export type MetricWithValuesDto = {
+    metric : MetricDTO,
+    values : MetricValueDto[]
+}
+
+export type SetMetricValueDto = {
+    metricId :	string,
+    userId:	number,
+    value:	number
+}
+export type GradeDto = {
+    targetId : string,
+    value : number
+}
 export type TaskSolutionType = 'LAST' | 'FIRST' | 'CAPITAN' | 'DEMOCRATIC' | 'QUALIFIED';

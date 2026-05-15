@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
@@ -117,7 +117,7 @@ async function CreatePost(label: string, text: string, type : string, deadline: 
         formData.append('text', text);
         formData.append('type', type);
         formData.append('deadline', deadline);
-        formData.append('needMark', (type == PostType.TASK).toString()); 
+        formData.append('needMark', (type != PostType.NEWS).toString()); 
         formData.append('channelId', channelId);
         if(file != null) {formData.append('file', file);} 
 
@@ -1197,8 +1197,101 @@ async function getTeam(teamId: string): Promise<Team | null> {
     }
 }
 
+async function AddMetric(newMetric : CreateMetricDTO) {
+    try {
+        await instance.post(`api/metrics`, newMetric, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+    } catch (e) {
+        console.error("Failed to set user mark:", e);
+        return e
+    }
+}
+
+async function getMetric(postOrTaskId : string , postType : PostType) {
+    try {
+        let postOrTaskEndpoint = '';
+        if( postType == PostType.TASK) {postOrTaskEndpoint = "post"}
+        else if (postType == PostType.TEAM_TASK) {postOrTaskEndpoint = "task"}
+
+        const { data } = await instance.get<MetricDTO[]>(`api/metrics/${postOrTaskEndpoint}/${postOrTaskId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch team:", e);
+        return [];
+    }
+}
+
+async function deleteMetric(id : string)   { 
+    try
+    {
+        await instance.delete(`api/metrics/${id}`,  {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }
+        
+    })
+    }
+    catch(e)
+    {
+        console.log(e)
+    }
+}
+
+async function getPostMetricValue(postId : string , userId : number) {
+    try {
+
+        const { data } = await instance.get<MetricWithValuesDto[]>(`api/metrics/post/${postId}/values?userId=${userId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch team:", e);
+        return [];
+    }
+}
 
 
+async function changeMetricToUser(newMetric : SetMetricValueDto)   { 
+    try 
+    {
+        await instance.put(`api/metrics/values`  , newMetric ,{
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+    } 
+    catch (e) 
+    {
+        console.error( e);
+        return e
+    }
+    
+    
+};
+
+
+async function getPostMarkByUserId(postId : string , userId : number) {
+    try {
+
+        const { data } = await instance.get<GradeDto>(`api/grades/post/${postId}/user/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch team:", e);
+    }
+}
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -1279,5 +1372,12 @@ export const api = {
     DistrbuteMarks : DistrbuteMarks,
 
     getTeam,
-    getSelectedSolutions
+    getSelectedSolutions,
+
+    AddMetric : AddMetric,
+    getMetric : getMetric,
+    deleteMetric : deleteMetric,
+    getPostMetricValue : getPostMetricValue,
+    changeMetricToUser : changeMetricToUser,
+    getPostMarkByUserId : getPostMarkByUserId
 }

@@ -14,6 +14,7 @@ import SendTaskDialog from './Dialogs/SendTaskDialog';
 import { GetCommentsByPostIdThunk, GetSolutionsByPostIdThunk } from '../reducers/posts-reducer';
 import OrderSolutionDialog from './Dialogs/OrderSolutionDialog';
 import PostComment from './Dialogs/PostComment';
+import MetricsDialog from './Dialogs/MetricsDialog';
 
 
 const PostInfo: React.FC = () => {
@@ -53,8 +54,11 @@ const PostInfo: React.FC = () => {
                     <div style={{display: "flex",justifyContent : "space-between",  gap:"5px", alignItems: "center"}}>
                         <p className='headline'>{PostTypeTranslations[postState.type]}: {postState.label} </p>
                         <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
-                            {hasAnyRole([STUDENT]) && postState.type == PostType.TASK &&  < SendTaskDialog/> }
-                            {hasAnyRole([MANAGER,TEACHER]) && <DeletePostDialog/> }
+                            {hasAnyRole([STUDENT]) && (postState.type == PostType.TASK || postState.type == PostType.CONTROL) &&  < SendTaskDialog/> }
+                            {hasAnyRole([MANAGER,TEACHER]) && ( <> 
+                                {(postState.type == PostType.TASK || postState.type == PostType.CONTROL) && ( <MetricsDialog id={postState.id} postType={postState.type}/> )}
+                                <DeletePostDialog/>  
+                            </>) }
                         </div>
                     </div>
                     
@@ -98,7 +102,7 @@ const PostInfo: React.FC = () => {
 
 
                 
-                {postState.type == PostType.TASK &&  hasAnyRole([MANAGER,TEACHER])  &&(
+                {(postState.type == PostType.TASK || postState.type == PostType.CONTROL) &&  hasAnyRole([MANAGER,TEACHER])  &&(
 
                     <div className='simpleForm'>  
                         <div style={{display : "flex", justifyContent: "space-between"}}>
@@ -112,7 +116,7 @@ const PostInfo: React.FC = () => {
                                  <p className='baseP'> <b> Текст:</b>  {sol.text}</p>
                                  {sol.fileUrl !== null && ( <p className='baseP' style={{cursor : "pointer"}} onClick={() => window.location.href = sol.fileUrl!} > <b> Файл:</b>   {sol.fileName}</p> )}
                                 
-                                < OrderSolutionDialog solId={sol.id} mark={sol.mark}/>
+                                < OrderSolutionDialog   userId={sol.studentId}/>
                                 <hr className="hr" />
                             </div>
                             

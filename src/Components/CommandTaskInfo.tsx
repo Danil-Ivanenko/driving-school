@@ -12,7 +12,7 @@ import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../RoleChecker';
 import CreatePostDialog from './Dialogs/CreatePostDialog';
 import SendTaskDialog from './Dialogs/SendTaskDialog';
 import { GetCommentsByPostIdThunk, GetPostByIdThunk, GetSolutionsByPostIdThunk } from '../reducers/posts-reducer';
-import OrderSolutionDialog from './Dialogs/OrderSolutionDialog';
+
 import PostComment from './Dialogs/PostComment';
 import TeamInfo from './Dialogs/TeamInfo';
 import CreateTeamDialog from './Dialogs/CreateTeamDialog';

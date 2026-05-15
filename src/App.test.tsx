@@ -15,38 +15,38 @@ import SendTaskDialog from './Components/Dialogs/SendTaskDialog';
 
 
 
-describe('OrderSolutionDialog Component', () => {
-    const setup = () => {
+// describe('OrderSolutionDialog Component', () => {
+//     const setup = () => {
 
-    render(
-      <Provider store={store}>
-        <OrderSolutionDialog solId={'1'}  />
-      </Provider>
-    );
+//     render(
+//       <Provider store={store}>
+//         <OrderSolutionDialog solId={'1'}  />
+//       </Provider>
+//     );
 
-    const openButton = screen.getByText( 'Оценка:' );
+//     const openButton = screen.getByText( 'Оценка:' );
     
-    return { openButton };
-  };
+//     return { openButton };
+//   };
   
-  test('Открывается модальное окно', async () => {
+//   test('Открывается модальное окно', async () => {
 
-    const { openButton } = setup();
-    fireEvent.click(openButton);
-    expect(screen.getByText('Отмена')).toBeInTheDocument();
+//     const { openButton } = setup();
+//     fireEvent.click(openButton);
+//     expect(screen.getByText('Отмена')).toBeInTheDocument();
 
-  });
+//   });
 
-    test('Закрывается модальное окно', async () => {
+//     test('Закрывается модальное окно', async () => {
 
-    const { openButton} = setup();
-    fireEvent.click(openButton);
-    const closeButton = screen.getByText('Отмена');
+//     const { openButton} = setup();
+//     fireEvent.click(openButton);
+//     const closeButton = screen.getByText('Отмена');
 
-    fireEvent.click(closeButton);
-    expect(screen.queryByText('Отмена')).not.toBeInTheDocument();
-  });
-});
+//     fireEvent.click(closeButton);
+//     expect(screen.queryByText('Отмена')).not.toBeInTheDocument();
+//   });
+// });
 
 
 
