@@ -17,6 +17,7 @@ import PostComment from './Dialogs/PostComment';
 import TeamInfo from './Dialogs/TeamInfo';
 import CreateTeamDialog from './Dialogs/CreateTeamDialog';
 import TaskSolutionManager from './Dialogs/TaskSolutionManager'; 
+import MetricsDialog from './Dialogs/MetricsDialog';
 
 
 const CommandTaskInfo: React.FC = () => {
@@ -170,7 +171,7 @@ const CommandTaskInfo: React.FC = () => {
                         <p className='headline'>Командное задание: {postState.label} </p>
                         
                         <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
-                            {hasAnyRole([MANAGER,TEACHER]) && <DeletePostDialog/> }
+                            {hasAnyRole([MANAGER,TEACHER]) && <>  <MetricsDialog id={postState.id} postType={PostType.TEAM_TASK} />  <DeletePostDialog /> </> }
                         </div>
                     </div>
                     

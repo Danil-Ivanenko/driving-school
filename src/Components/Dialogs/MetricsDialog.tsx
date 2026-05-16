@@ -20,7 +20,7 @@ const MetricsDialog: React.FC<{ id: string, postType: PostType}> = ({ id, postTy
         maxValue: 0,
         type: MetricType.MARK,
         postId: postType != PostType.TEAM_TASK ? id : null,
-        taslkId: postType == PostType.TEAM_TASK ? id : null,
+        taskId: postType == PostType.TEAM_TASK ? id : null,
         isValuesVisibleToStudents :true,
         isVisibleToStudents : true
     });
@@ -31,6 +31,7 @@ const MetricsDialog: React.FC<{ id: string, postType: PostType}> = ({ id, postTy
         ...prev,
         [name]: name === 'minValue' || name === 'maxValue' ? Number(value) : value,
         }));
+        setError('')
     };
 
     
@@ -51,7 +52,7 @@ const MetricsDialog: React.FC<{ id: string, postType: PostType}> = ({ id, postTy
                 maxValue: 0,
                 type: MetricType.MARK,
                 postId: postType != PostType.TEAM_TASK ? id : null,
-                taslkId: postType == PostType.TEAM_TASK ? id : null,
+                taskId: postType == PostType.TEAM_TASK ? id : null,
                 isValuesVisibleToStudents :true,
                 isVisibleToStudents : true
             });

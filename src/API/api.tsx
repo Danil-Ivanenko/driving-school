@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto, SetTeamMetricValueDto } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
@@ -1082,32 +1082,24 @@ async function setUserMark(userId: number, taskId: string, mark: number): Promis
     }
 }
 
-async function getTeamMark(teamId: string): Promise<number | null> {
+
+
+async function getTeamMark(taskId: string, userId : number){ /// ПЕРЕДЕЛАТЬ
     try {
-        const { data } = await instance.get<number>(`api/teams/${teamId}/mark`, {
+        const { data } = await instance.get<GradeDto>(`api/grades/task/${taskId}/user/${userId}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }
         });
-        return data;
+        //console.log(data)
+        return data.value;
     } catch (e) {
         console.error("Failed to fetch team mark:", e);
         return null;
     }
 }
 
-async function setTeamMark(teamId: string, mark: number): Promise<void> {
-    try {
-        await instance.post(`api/teams/${teamId}/mark?mark=${mark}`, null, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-    } catch (e) {
-        console.error("Failed to set team mark:", e);
-        throw e;
-    }
-}
+
 
 async function getTaskTeams(taskId: string): Promise<Team[]> {
     try {
@@ -1153,6 +1145,22 @@ async function MakeUserCapitan(teamId: string, userId : number) {
         throw e;
     }
 }
+
+async function getUserTeamMark(taskId: string, userId : number){
+    try {
+        const { data } = await instance.get<GradeDto>(`api/grades/task/${taskId}/user/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        //console.log(data)
+        return data.value;
+    } catch (e) {
+        console.error("Failed to fetch team mark:", e);
+        return null;
+    }
+}
+
 
 
 async function GetDistrbutionMarks(taskId : string ,teamId: string) {
@@ -1259,6 +1267,21 @@ async function getPostMetricValue(postId : string , userId : number) {
     }
 }
 
+async function getTeamTaskMetricValue(taskId : string , userId : number) {
+    try {
+
+        const { data } = await instance.get<MetricWithValuesDto[]>(`api/metrics/task/${taskId}/values?userId=${userId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch team:", e);
+        return [];
+    }
+}
+
 
 async function changeMetricToUser(newMetric : SetMetricValueDto)   { 
     try 
@@ -1277,6 +1300,27 @@ async function changeMetricToUser(newMetric : SetMetricValueDto)   {
     
     
 };
+
+async function changeMetricToTeam(newMetric : SetTeamMetricValueDto)   { 
+    try 
+    {
+        await instance.put(`api/metrics/values/team`  , newMetric ,{
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }});
+        
+    } 
+    catch (e) 
+    {
+        console.error( e);
+        return e
+    }
+    
+    
+};
+
+
+
 
 
 async function getPostMarkByUserId(postId : string , userId : number) {
@@ -1363,7 +1407,7 @@ export const api = {
     getUserMark,
     setUserMark,
     getTeamMark,
-    setTeamMark,
+    //setTeamMark,
     getTaskTeams,
     getMyTeamByTask,
 
@@ -1379,5 +1423,8 @@ export const api = {
     deleteMetric : deleteMetric,
     getPostMetricValue : getPostMetricValue,
     changeMetricToUser : changeMetricToUser,
-    getPostMarkByUserId : getPostMarkByUserId
+    getPostMarkByUserId : getPostMarkByUserId,
+    getTeamTaskMetricValue  : getTeamTaskMetricValue,
+    changeMetricToTeam : changeMetricToTeam,
+    getUserTeamMark : getUserTeamMark
 }

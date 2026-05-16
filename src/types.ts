@@ -317,7 +317,7 @@ export type CreateMetricDTO ={
     isVisibleToStudents: boolean,
     isValuesVisibleToStudents: boolean,
     postId : string | null,
-    taslkId : string | null
+    taskId : string | null
 }
 
 export type MetricDTO ={
@@ -330,10 +330,10 @@ export type MetricDTO ={
     isVisibleToStudents: boolean,
     isValuesVisibleToStudents: boolean,
     postId : string | null,
-    taslkId : string | null
+    taskId : string | null
 }
 export type MetricValueDto ={
-    userId : string,
+    userId : number,
     value : number
 }
 export type MetricWithValuesDto = {
@@ -350,4 +350,11 @@ export type GradeDto = {
     targetId : string,
     value : number
 }
+
+export type SetTeamMetricValueDto= {
+    metricId :	string,
+    teamId:	string,
+    value:	number
+}
+
 export type TaskSolutionType = 'LAST' | 'FIRST' | 'CAPITAN' | 'DEMOCRATIC' | 'QUALIFIED';

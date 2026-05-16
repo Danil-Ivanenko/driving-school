@@ -5,7 +5,7 @@ import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducer
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
 import { GetCommentsByPostIdThunk, GetPostByIdThunk, GetSolutionsByPostIdThunk } from "../../reducers/posts-reducer";
-import { PostType, Team } from "../../types";
+import { MetricTranslations, MetricWithValuesDto, PostType, Team } from "../../types";
 import { hasAnyRole, MANAGER, STUDENT, TEACHER } from "../../RoleChecker";
 import DeletePostDialog from "./DeletePostDialog";
 import DeleteTeamDilaog from "./DeleteTeamDilaog";
@@ -16,29 +16,39 @@ import TeamMarkDialog from "./TeamMarkDialog";
 import StudentMarkDialog from "./StudentMarkDialog";
 import DelelteOrMakeCapitanDialog from "./DelelteOrMakeCapitanDialog";
 import ReallocationOfMarksDialog from "./ReallocationOfMarksDialog";
+import StudentMetricsDialog from "./StudentMetricsDialog";
+import TeamTaskMetricsForUser from "../TeamTaskMetricsForUser";
 const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
     const postState = useTypedSelector(state => state.posts.selectedPost!); 
     const [isOpen, setOpen] = useState<boolean>(false);
+    //const [metricsValues, setMetricsValues] = useState<MetricWithValuesDto[]>([]);
 
     const [teamMark, setTeamMark] = useState<number | null>(null);
     const [userMarks, setUserMarks] = useState<Map<number, number>>(new Map());
     const [loadingMarks, setLoadingMarks] = useState(false);
-
+    const [showTeamMarkDialog, setShowTeamMarkDialog] = useState(false);
     const currentUser = useTypedSelector(state => state.myProfile.profile);
     const isCurrentUserInThisTeam = () => {
         if (!hasAnyRole([STUDENT])) return false;
         return team.users.some(user => user.id === currentUser?.id);
     };
-
+    const userMyId = Number(localStorage.getItem('id'));
+    
     useEffect(() => {
-        const loadMarks = async () => {
+        
+        
+        loadMarks();
+    }, [team.id, team.taskId, team.users, showTeamMarkDialog]);
+
+const loadMarks = async () => {
             setLoadingMarks(true);
             try {
-                const mark = await api.getTeamMark(team.id);
+                const mark = await api.getTeamMark(postState.id, team.users[0].id);
                 setTeamMark(mark);
-
                 const marksMap = new Map<number, number>();
-
+                
+                //const metrics = await api.getTeamTaskMetricValue(postState.id, team.users[0].id);
+                //setMetricsValues(metrics);
                 if (hasAnyRole([STUDENT])) {
                     if (isCurrentUserInThisTeam()) {
                         for (const user of team.users) {
@@ -63,11 +73,6 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
                 setLoadingMarks(false);
             }
         };
-        
-        loadMarks();
-    }, [team.id, team.taskId, team.users]);
-
-
     // useEffect(() => {
     //     const loadMarks = async () => {
     //         setLoadingMarks(true);
@@ -93,7 +98,7 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
     //     loadMarks();
     // }, [team.id, team.taskId, team.users]);
 
-    const [showTeamMarkDialog, setShowTeamMarkDialog] = useState(false);
+    
     const [selectedStudent, setSelectedStudent] = useState<{ id: number; name: string; surname: string } | null>(null);
 
     const dispatch: any = useDispatch()
@@ -104,8 +109,9 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
         dispatch(GetPostByIdThunk(team.taskId, PostType.TEAM_TASK))
         setOpen(false)
     }
-    const refreshData = () => {
+    const refreshData = async () => {
         dispatch(GetPostByIdThunk(team.taskId, PostType.TEAM_TASK));
+        await loadMarks();
     };
     return(
         <>
@@ -139,13 +145,7 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
                         {hasAnyRole([STUDENT]) &&  <p className='userP' key={user.id} > {team.captainId == user.id ? "Капитан:" : ""} {user.surname} {user.name}  </p> }
                         
                         {hasAnyRole([MANAGER, TEACHER]) && (
-                            <button 
-                                className={styles.button}
-                                style={{ marginLeft: '10px', fontSize: '12px' }}
-                                onClick={() => setSelectedStudent({ id: user.id, name: user.name, surname: user.surname })}
-                            >
-                                Оценить
-                            </button>
+                            <StudentMetricsDialog userId={user.id} />
                         )}
                     </div>
                     
@@ -154,12 +154,30 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
                   
                 {!loadingMarks && teamMark !== null && (
 
-                    <p className='baseP' style={{ marginTop: '10px', color: '#10b981' }}>
+                    <p className='baseHeader' style={{ marginTop: '10px', color: '#10b981' }}>
                         Оценка команды: {teamMark}
                     </p>
                     
                 )}
-                 {hasAnyRole([STUDENT]) && team.mark != null &&<ReallocationOfMarksDialog team={team}/> }
+                {isCurrentUserInThisTeam() && (
+                    <TeamTaskMetricsForUser userId={userMyId}/>
+                )}
+                
+                {/* {metricsValues.map(metricVal => 
+                        (
+                            <div key={metricVal.metric.id}>
+                                
+                                
+                                <div>
+                                    <p  className="baseHeader">{metricVal.metric.name}, тип:  {MetricTranslations[metricVal.metric.type]}, min: {metricVal.metric.minValue}, max: {metricVal.metric.maxValue}</p>
+                                    <p className="baseHeader"> значение: {metricVal.values[0].value} </p>
+                                    <hr></hr>
+                                </div>
+
+                            </div>
+                        )
+                    )} */}
+                 {/* {hasAnyRole([STUDENT]) && teamMark != 0 &&<ReallocationOfMarksDialog team={team}/> } */}
                 {!loadingMarks && userMarks.size > 0 && (
                     <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '8px' }}>
                         <p className='baseP' style={{ fontWeight: 'bold' }}>Персональные оценки:</p>
@@ -178,22 +196,19 @@ const TeamInfo: React.FC<{ team: Team}> = ({ team}) => {
 
             {showTeamMarkDialog && (
                 <TeamMarkDialog
-                    teamId={team.id}
-                    teamName={team.name}
+                    team={team}
                     onClose={() => setShowTeamMarkDialog(false)}
-                    onSuccess={refreshData}
-                />
+                    onSuccess={refreshData} />
             )}
 
-            {selectedStudent && (
-                <StudentMarkDialog
+            {/* {selectedStudent && (
+                <><StudentMarkDialog
                     userId={selectedStudent.id}
                     userName={`${selectedStudent.surname} ${selectedStudent.name}`}
                     taskId={team.taskId}
                     onClose={() => setSelectedStudent(null)}
-                    onSuccess={refreshData}
-                />
-            )}
+                    onSuccess={refreshData} /></>
+            )} */}
             
         </>
         
