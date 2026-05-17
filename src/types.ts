@@ -38,7 +38,8 @@ export type Post = {
     authorName: string,
     fileUrl? : string,
     fileName? : string
-    studentSolution? : StudentSolution
+    studentSolution? : StudentSolution,
+    isMetricsVisibleToStudents : boolean
 }
 
 export type StudentSolution = {
@@ -224,6 +225,7 @@ export interface Task {
   minTeamSize: number;
   votingDeadline: string; 
   teams: Team[];
+  isMetricsVisibleToStudents : boolean;
 }
 
 

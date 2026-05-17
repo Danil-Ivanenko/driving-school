@@ -109,21 +109,23 @@ const SendTaskDialog: React.FC = () => {
                             )
                         }
                         
-                        <p  style={{fontSize :"20px", margin :"0px"}} >Критерии</p>
-                        {metricsValues.map(metricVal => 
-                            (
+                            {metricsValues && metricsValues.length > 0 && (
+                            <>
+                                <p style={{ fontSize: "20px", margin: "0px" }}>Критерии</p>
+                                {metricsValues.map(metricVal => (
                                 <div key={metricVal.metric.id}>
-                                    
-                                    
                                     <div>
-                                        <p  className="baseHeader">{metricVal.metric.name}, тип:  {MetricTranslations[metricVal.metric.type]}, min: {metricVal.metric.minValue}, max: {metricVal.metric.maxValue}</p>
-                                        <p className="baseHeader"> значение: {metricVal.values[0].value} </p>
-                                        <hr></hr>
+                                    <p className="baseHeader">
+                                        {metricVal.metric.name}, тип: {MetricTranslations[metricVal.metric.type]}, 
+                                        min: {metricVal.metric.minValue}, max: {metricVal.metric.maxValue}
+                                    </p>
+                                    <p className="baseHeader"> значение: {metricVal.values[0]?.value} </p>
+                                    <hr />
                                     </div>
-
                                 </div>
-                            )
-                        )}
+                                ))}
+                            </>
+                            ) }
 
         
                         <div style={{display : "flex", justifyContent : "flex-end", gap :"5px"}} >

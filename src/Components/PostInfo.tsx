@@ -11,7 +11,7 @@ import DeletePostDialog from './Dialogs/DeletePostDialog';
 import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../RoleChecker';
 import CreatePostDialog from './Dialogs/CreatePostDialog';
 import SendTaskDialog from './Dialogs/SendTaskDialog';
-import { GetCommentsByPostIdThunk, GetSolutionsByPostIdThunk } from '../reducers/posts-reducer';
+import { GetCommentsByPostIdThunk, GetPostByIdThunk, GetSolutionsByPostIdThunk } from '../reducers/posts-reducer';
 import OrderSolutionDialog from './Dialogs/OrderSolutionDialog';
 import PostComment from './Dialogs/PostComment';
 import MetricsDialog from './Dialogs/MetricsDialog';
@@ -42,7 +42,13 @@ const PostInfo: React.FC = () => {
         }
 
     }
-    
+
+    const ChangeMetricsVisibility = async () =>{
+
+            await api.changePostVisibility(postState.id, !postState.isMetricsVisibleToStudents)
+            dispatch(GetPostByIdThunk(postState.id,postState.type ))
+    }
+
 
     return (
         
@@ -70,7 +76,10 @@ const PostInfo: React.FC = () => {
                     {postState.deadline != null && (
                         <p className='baseP'>Сдать до {postState.deadline}</p>
                     )}
-
+                    
+                    {hasAnyRole([MANAGER,TEACHER]) && ( <> 
+                             <p className='baseP' onClick={ChangeMetricsVisibility} >Видимость : {String(postState.isMetricsVisibleToStudents)}</p>
+                    </>) }
 
                     <p> {postState.text}</p>
 

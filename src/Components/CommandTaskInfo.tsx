@@ -160,6 +160,15 @@ const CommandTaskInfo: React.FC = () => {
             dispatch(GetPostByIdThunk(postState.id ,PostType.TEAM_TASK ))
         }
     };
+
+    const ChangeMetricsVisibility = async () =>{
+
+            await api.changeTeamMetricsVisibility(postState.id, !postState.isMetricsVisibleToStudents)
+   
+            dispatch(GetPostByIdThunk(postState.id, PostType.TEAM_TASK ))
+    }
+
+    
     return (
         
         <div className='containerCol' style={{ maxHeight: '100vh',   overflowY: 'auto'}}>
@@ -193,6 +202,9 @@ const CommandTaskInfo: React.FC = () => {
                     {postState.qualifiedMin != null && (
                         <p className='baseP'>Кол-во квалификации: {postState.qualifiedMin}</p>
                     )}
+                    {hasAnyRole([MANAGER, TEACHER]) && (
+                            <p className='baseP' onClick={ChangeMetricsVisibility} >Видимость : {String(postState.isMetricsVisibleToStudents)}</p>
+                        )}
                     <br></br>
                     
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>

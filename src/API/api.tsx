@@ -1336,6 +1336,55 @@ async function getPostMarkByUserId(postId : string , userId : number) {
         console.error("Failed to fetch team:", e);
     }
 }
+
+async function changeTeamMetricsVisibility(taskId : string, isVisible : boolean) {
+    try
+    {
+        const formData = new FormData();
+        formData.append('isMetricsVisibleToStudents', String(isVisible) );
+        formData.append('isMetricValuesVisibleToStudents', String(isVisible));
+
+        const {data, status} = await instance.patch(`api/tasks/${taskId}`,
+            formData,
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        return data
+    }
+    catch(e)
+    {
+        console.log(e);
+    }
+}
+
+async function changePostVisibility(postId : string, isVisible : boolean) {
+    try
+    {
+
+
+        const {data, status} = await instance.patch(`api/posts/${postId}/visibility` ,
+            {
+            "isMetricsVisibleToStudents": isVisible,
+            "isMetricValuesVisibleToStudents": isVisible
+            },
+
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        return data
+    }
+    catch(e)
+    {
+        console.log(e);
+    }
+}
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -1426,5 +1475,7 @@ export const api = {
     getPostMarkByUserId : getPostMarkByUserId,
     getTeamTaskMetricValue  : getTeamTaskMetricValue,
     changeMetricToTeam : changeMetricToTeam,
-    getUserTeamMark : getUserTeamMark
+    getUserTeamMark : getUserTeamMark,
+    changePostVisibility : changePostVisibility,
+    changeTeamMetricsVisibility : changeTeamMetricsVisibility
 }
