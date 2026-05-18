@@ -103,7 +103,7 @@ const MetricsDialog: React.FC<{ id: string, postType: PostType}> = ({ id, postTy
                     name="comment"
                     value={newMetric.comment}
                     onChange={handleInputChange}
-                    placeholder="Описание метрики"
+                    placeholder="Введите комментарий к критерию, например в таком формате: Значение - Фактор"
                     style={{ maxWidth :"100%"}}
                   />
                 </div>

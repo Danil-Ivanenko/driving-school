@@ -31,9 +31,10 @@ const TeamTaskMetricsForUser: React.FC<{ userId: number}> = ({ userId}) => {
 
     return(
     <>
+        {mark != null && (<p className="baseHeader">Оценка: {mark}</p>)}
         {metricsValues.length > 0 && (
             <div> 
-                <p className="baseHeader">Оценка: {mark}</p>
+                
                 {metricsValues.map(metricVal => (
                     <div key={metricVal.metric.id}>
                         <div>
