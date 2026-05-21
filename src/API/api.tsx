@@ -1222,7 +1222,7 @@ async function AddMetric(newMetric : CreateMetricDTO) {
 async function getMetric(postOrTaskId : string , postType : PostType) {
     try {
         let postOrTaskEndpoint = '';
-        if( postType == PostType.TASK) {postOrTaskEndpoint = "post"}
+        if( postType == PostType.TASK || postType == PostType.CONTROL) {postOrTaskEndpoint = "post"}
         else if (postType == PostType.TEAM_TASK) {postOrTaskEndpoint = "task"}
 
         const { data } = await instance.get<MetricDTO[]>(`api/metrics/${postOrTaskEndpoint}/${postOrTaskId}`, {
