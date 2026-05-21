@@ -80,7 +80,18 @@ const PostInfo: React.FC = () => {
                     {hasAnyRole([MANAGER,TEACHER]) && ( <> 
                              <p className='baseP' onClick={ChangeMetricsVisibility} >Видимость : {String(postState.isMetricsVisibleToStudents)}</p>
                     </>) }
+                    {postState.type == PostType.CONTROL && ( <> 
+                        <p className='baseP'  > Задания:</p>
+                        {postState.control.postTaskIds.map((postTask) => (
+                            <p className='baseP' key={postTask.id}>  {postTask.label}</p>
+                        ))}
+                        
+                        {postState.control.taskIds.map((postTask) => (
+                            <p className='baseP' key={postTask.id}>  {postTask.label}</p>
+                        ))}
+                    </>) }
 
+                    <hr/>
                     <p> {postState.text}</p>
 
                 </div>

@@ -29,6 +29,19 @@ export type PostShort ={
     authorName: string,
     totalComments : number
 }
+
+export type IdLabelDto ={
+    id : string,
+    label : string
+}
+
+export type ControlDto ={
+    postId : string,
+    channelId : string,
+    postTaskIds : IdLabelDto[],
+    taskIds: IdLabelDto[]
+}
+
 export type Post = {
     id: string,
     label: string,
@@ -39,7 +52,8 @@ export type Post = {
     fileUrl? : string,
     fileName? : string
     studentSolution? : StudentSolution,
-    isMetricsVisibleToStudents : boolean
+    isMetricsVisibleToStudents : boolean,
+    control : ControlDto
 }
 
 export type StudentSolution = {
@@ -393,5 +407,17 @@ export const MarkTranslations: Record<MarkType, string> = {
     [MarkType.TASK]: "Командое задание",
     [MarkType.CONTROL]: "Контрольная"
 };
+
+export enum UnitType{
+    MINUTE = "MINUTE",  
+    HOUR = "HOUR",
+    DAY    = "DAY"
+}
+
+export type DeadlinePenaltyDto ={
+    unit: UnitType,
+    step: number,
+    value: number
+}
 
 export type TaskSolutionType = 'LAST' | 'FIRST' | 'CAPITAN' | 'DEMOCRATIC' | 'QUALIFIED';

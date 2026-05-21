@@ -109,7 +109,7 @@ async function DeletePost(id: string)   {
     }
 };
 
-async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string, file : File | null)   { 
+async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string, file : File | null , controlPostTaskIds? : string[] , controlTaskIds? : string[] )   { 
     try
     {
         const formData = new FormData();
@@ -120,7 +120,8 @@ async function CreatePost(label: string, text: string, type : string, deadline: 
         formData.append('needMark', (type != PostType.NEWS).toString()); 
         formData.append('channelId', channelId);
         if(file != null) {formData.append('file', file);} 
-
+        if(controlPostTaskIds) {formData.append('controlPostTaskIds', controlPostTaskIds.join(','))}
+        if(controlTaskIds){formData.append('controlTaskIds',  controlTaskIds.join(','))}
         await instance.post(`api/posts`,
             formData,
         {

@@ -4,7 +4,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducers/channel-reducer";
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
-import { PostType } from "../../types";
+import { PostType, PostTypeTranslations } from "../../types";
 import { GetPostsThunk } from "../../reducers/posts-reducer";
 
 const CreatePostDialog: React.FC = ()  => {
@@ -14,6 +14,10 @@ const CreatePostDialog: React.FC = ()  => {
     const [postType, setPostType] = useState<PostType>(PostType.NEWS);
     const [postDeadline, setPostDeadline] = useState<string>('');
     const [file, setFile] = useState<File| null>(null);
+    const posts = useTypedSelector(state => state.posts.posts);
+    const [taskIds, setTaskIds] = useState<string[]>([]);
+    const [teamTaskIds, setTeamTaskIds] = useState<string[]>([]);
+
 
     const handlePostNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPostName(event.target.value); 
@@ -47,14 +51,51 @@ const CreatePostDialog: React.FC = ()  => {
     const selectedChannel = useTypedSelector(state => state.channels.selectedChannel);
 
     const CreatePost = async () =>{
-        await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file)
+        if(postType == PostType.CONTROL)
+        {
+            await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file, taskIds, teamTaskIds)
+        }
+        else
+        {
+            await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file)
+        }
+        
         setOpen(false)
         setPostName('')
         setPostText('')
         setPostDeadline('')
         setFile(null);
+        setTaskIds([])
+        setTeamTaskIds([])
         dispatch(GetPostsThunk(selectedChannel!.id))
     }
+
+    const handleAddPostToList = (postId: string, postType: PostType) => {
+    if (postType === PostType.TASK) {
+        setTaskIds(prev => {
+        if (!prev.includes(postId)) {
+            return [...prev, postId];
+        }
+        return prev;
+        });
+    } else if (postType === PostType.TEAM_TASK) {
+        setTeamTaskIds(prev => {
+        if (!prev.includes(postId)) {
+            return [...prev, postId];
+        }
+        return prev;
+        });
+    }
+    };
+
+    const handleRemovePostFromList = (postId: string, postType: PostType) => {
+        if (postType === PostType.TASK) {
+            setTaskIds(prev => prev.filter(id => id !== postId));
+        } else if (postType === PostType.TEAM_TASK) {
+            setTeamTaskIds(prev => prev.filter(id => id !== postId));
+        }
+        };
+
 
     return(
         <>
@@ -83,6 +124,43 @@ const CreatePostDialog: React.FC = ()  => {
                                 <option value={PostType.CONTROL}>Контрольная</option>
                             </select>
                         </div>
+                                        {postType == PostType.CONTROL && (
+                                        <>
+                                            <div>
+                                            <h3>Доступные для добавления:</h3>
+                                            {posts
+                                                .filter(post => post.type === PostType.TASK || post.type === PostType.TEAM_TASK)
+                                                .map(post => {
+                                                const isInTaskList = taskIds.includes(post.id);
+                                                const isInTeamTaskList = teamTaskIds.includes(post.id);
+                                                
+                                                return (
+                                                    <div key={post.id} style={{ 
+                                                        display: 'grid', 
+                                                        gridTemplateColumns: '1fr auto',
+                                                        alignItems: 'center',
+                                                        gap: '10px',
+                                                    }}>
+                                                    <span>{post.label}</span>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={post.type === PostType.TASK ? isInTaskList : isInTeamTaskList}
+                                                        onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            handleAddPostToList(post.id, post.type);
+                                                        } else {
+                                                            handleRemovePostFromList(post.id, post.type);
+                                                        }
+                                                        }}
+                                                    />
+                                                    <hr></hr>
+                                                    </div>
+                                                    
+                                                );
+                                                })}
+                                            </div>
+                                        </>
+                                        )}
                         <div>
                             <label htmlFor="post-deadline" >Срок </label>
                             <input id="post-deadline" type='datetime-local' value={postDeadline}  onChange={handlePostDeadlineChange}/>
