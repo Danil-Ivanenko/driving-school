@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto, SetTeamMetricValueDto, GradeTableDto } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto, SetTeamMetricValueDto, GradeTableDto, DeadlinePenaltyDto } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
@@ -109,7 +109,7 @@ async function DeletePost(id: string)   {
     }
 };
 
-async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string, file : File | null , controlPostTaskIds? : string[] , controlTaskIds? : string[] )   { 
+async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string, file : File | null , controlPostTaskIds? : string[] , controlTaskIds? : string[] ,deadlinePenalty? : DeadlinePenaltyDto )   { 
     try
     {
         const formData = new FormData();
@@ -122,6 +122,13 @@ async function CreatePost(label: string, text: string, type : string, deadline: 
         if(file != null) {formData.append('file', file);} 
         if(controlPostTaskIds) {formData.append('controlPostTaskIds', controlPostTaskIds.join(','))}
         if(controlTaskIds){formData.append('controlTaskIds',  controlTaskIds.join(','))}
+        if(deadlinePenalty && deadline != ""){
+                formData.append('deadlinePenalty', JSON.stringify({
+                unit: deadlinePenalty.unit,
+                step: deadlinePenalty.step,
+                value: deadlinePenalty.value
+         }));
+        }
         await instance.post(`api/posts`,
             formData,
         {
@@ -130,6 +137,7 @@ async function CreatePost(label: string, text: string, type : string, deadline: 
             }
         })
     }
+    
     catch(e)
     {
         return e
@@ -569,7 +577,7 @@ async function DeleteComment(commentId : number)   {
     
 };
 
-async function CreateCommandTask( channelId :string, label: string, text: string, teamType : CommandTeamType, freeTeamCount: number, type : CommandSolutionType, minTeamSize : number, isCanRedistribute : boolean, deadline?: string, qualifiedMin? : number | null, documents? : File | null)   { 
+async function CreateCommandTask( channelId :string, label: string, text: string, teamType : CommandTeamType, freeTeamCount: number, type : CommandSolutionType, minTeamSize : number, isCanRedistribute : boolean, deadline: string, qualifiedMin? : number | null, documents? : File | null , deadlinePenalty? : DeadlinePenaltyDto)   { 
     try
     {
         const formData = new FormData();
@@ -580,10 +588,17 @@ async function CreateCommandTask( channelId :string, label: string, text: string
         formData.append('freeTeamCount', freeTeamCount.toString() );
         formData.append('type', type.toString());
         formData.append('minTeamSize', minTeamSize.toString());
-        if(deadline != null) {formData.append('votingDeadline', deadline);} 
+        if(deadline != "") {formData.append('votingDeadline', `${deadline}:00.000Z`);} 
         if(qualifiedMin != null) {formData.append('qualifiedMin', qualifiedMin.toString());} 
         formData.append('isCanRedistribute ', isCanRedistribute.toString() ); 
         
+        if(deadlinePenalty && deadline != ""){
+                formData.append('deadlinePenalty', JSON.stringify({
+                unit: deadlinePenalty.unit,
+                step: deadlinePenalty.step,
+                value: deadlinePenalty.value
+         }));
+        }
         
 
         const {data, status} = await instance.post(`api/tasks?channelId=${channelId}`,

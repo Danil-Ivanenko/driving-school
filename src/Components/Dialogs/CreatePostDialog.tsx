@@ -4,7 +4,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { GetChannelsThunk, SetSelectedChannelActionCreator } from "../../reducers/channel-reducer";
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
-import { PostType, PostTypeTranslations } from "../../types";
+import { PostType, PostTypeTranslations, UnitType } from "../../types";
 import { GetPostsThunk } from "../../reducers/posts-reducer";
 
 const CreatePostDialog: React.FC = ()  => {
@@ -18,6 +18,9 @@ const CreatePostDialog: React.FC = ()  => {
     const [taskIds, setTaskIds] = useState<string[]>([]);
     const [teamTaskIds, setTeamTaskIds] = useState<string[]>([]);
 
+    const [unit, setUnit] = useState<UnitType>(UnitType.DAY);
+    const [step, setStep] = useState<number>( 1);
+    const [value, setValue] = useState<number>(1);
 
     const handlePostNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPostName(event.target.value); 
@@ -53,11 +56,11 @@ const CreatePostDialog: React.FC = ()  => {
     const CreatePost = async () =>{
         if(postType == PostType.CONTROL)
         {
-            await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file, taskIds, teamTaskIds)
+            await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file, taskIds, teamTaskIds, {unit : unit, step : step, value : value})
         }
         else
         {
-            await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file)
+            await api.CreatePost(postName, postText, postType, postDeadline, selectedChannel!.id, file, undefined ,undefined, {unit : unit, step : step, value : value})
         }
         
         setOpen(false)
@@ -68,6 +71,10 @@ const CreatePostDialog: React.FC = ()  => {
         setTaskIds([])
         setTeamTaskIds([])
         dispatch(GetPostsThunk(selectedChannel!.id))
+        setValue(1);
+        setUnit(UnitType.DAY);
+        setStep(1)
+
     }
 
     const handleAddPostToList = (postId: string, postType: PostType) => {
@@ -165,7 +172,42 @@ const CreatePostDialog: React.FC = ()  => {
                             <label htmlFor="post-deadline" >Срок </label>
                             <input id="post-deadline" type='datetime-local' value={postDeadline}  onChange={handlePostDeadlineChange}/>
                         </div>
-                        
+                        {postDeadline != "" && (
+                            <>
+                            <div>
+                                <label>Штраф раз в *</label>
+                                    <select 
+                                        value={unit} 
+                                        onChange={(e) => setUnit(e.target.value as UnitType)}
+                                    >
+                                        <option value={UnitType.MINUTE}>Минуты</option>
+                                        <option value={UnitType.HOUR}>Часы</option>
+                                        <option value={UnitType.DAY}>Дни</option>
+                                    </select>
+                            </div>
+
+                            <div >
+                                <label>Шаг *</label>
+                                <input 
+                                    type="number" 
+                                    value={step} 
+                                    onChange={(e) => setStep(Number(e.target.value))}
+                                    min="1"
+                                />
+                            </div>
+
+                            <div>
+                                <label>Значение штрафа *</label>
+                                <input 
+                                    type="number" 
+                                    value={value} 
+                                    onChange={(e) => setValue(Number(e.target.value))}
+                                    min="0"
+                                    step="0.01"
+                                />
+                            </div>
+                            </>
+                        )}
                         <div>                    
                             <input type="file" multiple={false} onChange={handleFileChange}  />
                             

@@ -4,7 +4,7 @@ import { ChangeEvent, use, useEffect, useRef, useState } from "react";
 
 import styles from '../../css/login.module.css'
 import { api } from "../../API/api";
-import { CommandSolutionType, CommandTeamType, ErrorResponse, PostType } from "../../types";
+import { CommandSolutionType, CommandTeamType, ErrorResponse, PostType, UnitType } from "../../types";
 import { GetPostsThunk } from "../../reducers/posts-reducer";
 import axios from "axios";
 
@@ -23,6 +23,10 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
     const [isCanRedistribute, setIsCanRedistribute ] = useState<boolean>(true);
     const [errorText, setErrorText] = useState<string>('');
 
+    const [unit, setUnit] = useState<UnitType>(UnitType.DAY);
+    const [step, setStep] = useState<number>( 1);
+    const [value, setValue] = useState<number>(1);
+        
     const handleMinTeamSize = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         sertMinTeamSize(value === '' ? '' : Number(value));
@@ -83,7 +87,7 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
                 Number(commandCount), postCommandSolutionType, Number(minTeamSize),
               isCanRedistribute, postDeadline, 
               typeof qualifiedMin === 'string' ? null : Number(qualifiedMin) , 
-              file )
+              file , {unit : unit, step : step, value : value})
 
         if(axios.isAxiosError<ErrorResponse>(data))
         {
@@ -107,7 +111,9 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
             sertMinTeamSize('')
             setIsCanRedistribute(true)
             setErrorText('')
-
+            setValue(1);
+            setUnit(UnitType.DAY);
+            setStep(1)
             dispatch(GetPostsThunk(selectedChannel!.id))
         }
     }
@@ -180,6 +186,43 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
                             <label htmlFor="post-deadline" >Срок </label>
                             <input id="post-deadline" type='datetime-local' value={postDeadline}  onChange={handlePostDeadlineChange}/>
                         </div>
+                        {postDeadline != "" && (
+                            <>
+                            <div>
+                                <label>Штраф раз в *</label>
+                                    <select 
+                                        value={unit} 
+                                        onChange={(e) => setUnit(e.target.value as UnitType)}
+                                    >
+                                        <option value={UnitType.MINUTE}>Минуты</option>
+                                        <option value={UnitType.HOUR}>Часы</option>
+                                        <option value={UnitType.DAY}>Дни</option>
+                                    </select>
+                            </div>
+
+                            <div >
+                                <label>Шаг *</label>
+                                <input 
+                                    type="number" 
+                                    value={step} 
+                                    onChange={(e) => setStep(Number(e.target.value))}
+                                    min="1"
+                                />
+                            </div>
+
+                            <div>
+                                <label>Значение штрафа *</label>
+                                <input 
+                                    type="number" 
+                                    value={value} 
+                                    onChange={(e) => setValue(Number(e.target.value))}
+                                    min="0"
+                                    step="0.01"
+                                />
+                            </div>
+                            </>
+                        )}
+
 
                         <div>                    
                             <input type="file" multiple={false} onChange={handleFileChange}  />
