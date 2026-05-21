@@ -5,7 +5,7 @@ import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
 import { api } from '../API/api';
 import {GetChannelsThunk, SetSelectedChannelActionCreator} from '../reducers/channel-reducer'
-import {  Post, PostType, PostTypeTranslations } from '../types';
+import {  Post, PostType, PostTypeTranslations, UnitTypeTranslations } from '../types';
 
 import DeletePostDialog from './Dialogs/DeletePostDialog';
 import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../RoleChecker';
@@ -73,8 +73,11 @@ const PostInfo: React.FC = () => {
                     }
 
                     
-                    {postState.deadline != null && (
+                    {postState.deadline != null && postState.deadlinePenalty != null && (
+                        <>
                         <p className='baseP'>Сдать до {postState.deadline}</p>
+                        <p className='baseP'>Наказание за deadline: за  {postState.deadlinePenalty.step} {UnitTypeTranslations[postState.deadlinePenalty.unit]}  - {postState.deadlinePenalty.value} балл</p>
+                        </>
                     )}
                     
                     {hasAnyRole([MANAGER,TEACHER]) && ( <> 

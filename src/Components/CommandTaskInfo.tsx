@@ -5,7 +5,7 @@ import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
 import { api } from '../API/api';
 import {GetChannelsThunk, SetSelectedChannelActionCreator} from '../reducers/channel-reducer'
-import {  Post, PostType, PostTypeTranslations, Task, Team } from '../types';
+import {  Post, PostType, PostTypeTranslations, Task, Team, UnitTypeTranslations } from '../types';
 
 import DeletePostDialog from './Dialogs/DeletePostDialog';
 import { hasAnyRole, MANAGER, STUDENT, TEACHER } from '../RoleChecker';
@@ -189,8 +189,11 @@ const CommandTaskInfo: React.FC = () => {
                     }
 
                     
-                    {postState.votingDeadline != null && (
+                    {postState.votingDeadline != null &&  postState.deadlinePenalty != null &&(
+                        <>
                         <p className='baseP'>Сдать до {postState.votingDeadline}</p>
+                        <p className='baseP'>Наказание за deadline: за  {postState.deadlinePenalty.step} {UnitTypeTranslations[postState.deadlinePenalty.unit]}  - {postState.deadlinePenalty.value} балл</p>
+                        </>
                     )}
 
 
@@ -199,6 +202,9 @@ const CommandTaskInfo: React.FC = () => {
                     <p className='baseP'>Тип сдачи: {postState.type}</p>
                     <p className='baseP' onClick={changeTaskRedistribute}>Перегруппировка: {postState.isCanRedistribute ? "+" : "-"}</p>
                     <p className='baseP'>Минимальное кол-во членов команды: {postState.minTeamSize}</p>
+                    
+
+
                     {postState.qualifiedMin != null && (
                         <p className='baseP'>Кол-во квалификации: {postState.qualifiedMin}</p>
                     )}

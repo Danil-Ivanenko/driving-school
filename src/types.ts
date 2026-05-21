@@ -53,7 +53,8 @@ export type Post = {
     fileName? : string
     studentSolution? : StudentSolution,
     isMetricsVisibleToStudents : boolean,
-    control : ControlDto
+    control : ControlDto,
+    deadlinePenalty : DeadlinePenaltyDto
 }
 
 export type StudentSolution = {
@@ -240,6 +241,7 @@ export interface Task {
   votingDeadline: string; 
   teams: Team[];
   isMetricsVisibleToStudents : boolean;
+  deadlinePenalty :	DeadlinePenaltyDto
 }
 
 
@@ -414,6 +416,11 @@ export enum UnitType{
     DAY    = "DAY"
 }
 
+export const UnitTypeTranslations: Record<UnitType, string> = {
+    [UnitType.MINUTE]: "минуту",
+    [UnitType.HOUR]: "час",
+    [UnitType.DAY]: "день"
+};
 export type DeadlinePenaltyDto ={
     unit: UnitType,
     step: number,
