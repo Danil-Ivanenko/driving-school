@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto, SetTeamMetricValueDto } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto, SetTeamMetricValueDto, GradeTableDto } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
@@ -1385,6 +1385,20 @@ async function changePostVisibility(postId : string, isVisible : boolean) {
     }
 }
 
+
+async function getGradeTableByChannelId(channelId  : string) {
+    try {
+
+        const { data } = await instance.get<GradeTableDto>(`api/grades/channel/${channelId}/table`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch team:", e);
+    }
+}
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -1477,5 +1491,6 @@ export const api = {
     changeMetricToTeam : changeMetricToTeam,
     getUserTeamMark : getUserTeamMark,
     changePostVisibility : changePostVisibility,
-    changeTeamMetricsVisibility : changeTeamMetricsVisibility
+    changeTeamMetricsVisibility : changeTeamMetricsVisibility,
+    getGradeTableByChannelId : getGradeTableByChannelId
 }

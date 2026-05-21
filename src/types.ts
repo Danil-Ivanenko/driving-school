@@ -359,4 +359,39 @@ export type SetTeamMetricValueDto= {
     value:	number
 }
 
+export type GradeTableTargetDto = {
+    targetId : string,
+    label : string,
+    type : MarkType
+}
+export type GradeTableCellDto ={
+    targetId : string,
+    rawValue : number,
+    controlIds : string[]
+}
+
+export type GradeTableRowDto = {
+    userId : number,
+    userName : string,
+    channelGrade : number,
+    grades : GradeTableCellDto[]
+}
+
+export type GradeTableDto = {
+    targets : GradeTableTargetDto[],
+    rows : GradeTableRowDto[]
+}
+
+export enum MarkType{
+    POST_TASK = "POST_TASK",  
+    TASK = "TASK",
+    CONTROL   = "CONTROL"
+}
+
+export const MarkTranslations: Record<MarkType, string> = {
+    [MarkType.POST_TASK]: "Задание",
+    [MarkType.TASK]: "Командое задание",
+    [MarkType.CONTROL]: "Контрольная"
+};
+
 export type TaskSolutionType = 'LAST' | 'FIRST' | 'CAPITAN' | 'DEMOCRATIC' | 'QUALIFIED';

@@ -16,18 +16,28 @@ import { hasAnyRole, MANAGER, TEACHER } from '../RoleChecker';
 import { GetMyProfileThunk } from '../reducers/myProfile-reducer';
 import HeaderComponent from '../Components/HeaderComponent';
 import CommandTaskInfo from '../Components/CommandTaskInfo';
+import UsersGradesTable from '../Components/UsersGradesTable';
 const MainPage: React.FC = () => {
     const [isCourseOpen, setCourseOpen] = useState<boolean>(true)
     const [isUsersOpen, setUsersOpen] = useState<boolean>(false)
-    
+    const [isTableOpen, setTableOpen] = useState<boolean>(false)
+    const openTable =  () =>{
+        setCourseOpen(false)
+        setUsersOpen(false)
+        setTableOpen(true)
+    }
+
+
     const openCourse =  () =>{
             setCourseOpen(true)
             setUsersOpen(false)
+            setTableOpen(false)
         }
 
     const openUsers =  () =>{
         setCourseOpen(false)
         setUsersOpen(true)
+        setTableOpen(false)
     }
 
     const channelState = useTypedSelector(state => state.channels); 
@@ -65,7 +75,7 @@ const MainPage: React.FC = () => {
                                 <div style={{display: "flex", justifyContent:  "flex-end",  gap:"5px", alignItems: "center"}}>
                                     <div className='course-block' style={ isCourseOpen ? {backgroundColor: "#b5d7ed"} : {}} onClick={openCourse}> Курс</div>
                                     <div className='course-block' style={ isUsersOpen ? {backgroundColor: "#b5d7ed"} : {}} onClick={openUsers}>  Пользователи</div>
-                                    
+                                     <div className='course-block' style={ isTableOpen ? {backgroundColor: "#b5d7ed"} : {}} onClick={openTable}>  Журнал</div>
                                     <DeleteChannel/>
                                 </div>
                                 )}
@@ -89,6 +99,10 @@ const MainPage: React.FC = () => {
                         
                         {isUsersOpen && (
                             <UsersChannelInfo/>
+                        )}
+
+                        {isTableOpen && (
+                            <UsersGradesTable/>
                         )}
 
                     </div>
