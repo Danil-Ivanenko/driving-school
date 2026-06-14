@@ -55,6 +55,12 @@ export type Post = {
     isMetricsVisibleToStudents : boolean,
     control : ControlDto,
     deadlinePenalty : DeadlinePenaltyDto
+    isP2pEnabled?: boolean;
+    p2pParam?: {
+        type: string;
+        visibility: string;
+        p2pDeadline?: string;
+    };
 }
 
 export type StudentSolution = {
@@ -227,21 +233,27 @@ export interface Team {
 }
 
 export interface Task {
-  id: string; 
-  label: string;
-  text: string;
-  channelId: string; 
-  startAt: string; 
-  documents: {fileName : string, fileUrl : string}[];
-  teamType: CommandTeamType;
-  type: CommandSolutionType
-  isCanRedistribute: boolean;
-  qualifiedMin: number;
-  minTeamSize: number;
-  votingDeadline: string; 
-  teams: Team[];
-  isMetricsVisibleToStudents : boolean;
-  deadlinePenalty :	DeadlinePenaltyDto
+    id: string; 
+    label: string;
+    text: string;
+    channelId: string; 
+    startAt: string; 
+    documents: {fileName : string, fileUrl : string}[];
+    teamType: CommandTeamType;
+    type: CommandSolutionType
+    isCanRedistribute: boolean;
+    qualifiedMin: number;
+    minTeamSize: number;
+    votingDeadline: string; 
+    teams: Team[];
+    isMetricsVisibleToStudents : boolean;
+    deadlinePenalty :	DeadlinePenaltyDto
+    isP2pEnabled: boolean;
+    p2pParam?: {
+        type: string;
+        visibility: string;
+        p2pDeadline?: string;
+    };
 }
 
 
@@ -428,3 +440,61 @@ export type DeadlinePenaltyDto ={
 }
 
 export type TaskSolutionType = 'LAST' | 'FIRST' | 'CAPITAN' | 'DEMOCRATIC' | 'QUALIFIED';
+
+export enum P2PType {
+    RANDOM = "RANDOM",
+    MANUAL = "MANUAL",
+    HIMSELF = "HIMSELF"
+}
+
+export enum P2PVisibility {
+    ALL = "ALL",
+    PART = "PART",
+    NONE = "NONE"
+}
+
+export enum P2PStatus {
+    PENDING = "PENDING",
+    COMPLETED = "COMPLETED",
+    EXPIRED = "EXPIRED"
+}
+
+export type P2PPairTeamDto = {
+    id: string;
+    task: Task;
+    reviewerTeam: Team;
+    ownerTeam: Team;
+    targetTaskSolutionId: string;
+    status: P2PStatus;
+}
+
+export type P2PPairPersonalDto = {
+    id: string;
+    post: Post;
+    reviewer: ChannelUser;
+    owner: ChannelUser;
+    targetSolutionId: string;
+    status: P2PStatus;
+}
+
+export type AssignP2PTeamDto = {
+    taskId: string;
+    reviewerTeamId: string;
+    ownerTeamId: string;
+    targetTaskSolutionId: string;
+}
+
+export type AssignP2PPersonalDto = {
+    postId: string;
+    reviewerId: number;
+    ownerId: number;
+    targetSolutionId: string;
+}
+
+export type ReassignP2PTeamDto = {
+    newReviewerTeamId: string;
+}
+
+export type ReassignP2PPersonalDto = {
+    newReviewerId: number;
+}

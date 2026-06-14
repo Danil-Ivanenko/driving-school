@@ -15,6 +15,8 @@ import { GetCommentsByPostIdThunk, GetPostByIdThunk, GetSolutionsByPostIdThunk }
 import OrderSolutionDialog from './Dialogs/OrderSolutionDialog';
 import PostComment from './Dialogs/PostComment';
 import MetricsDialog from './Dialogs/MetricsDialog';
+import P2PManagerPersonal from './Dialogs/P2PManagerPersonal';
+import { ChannelUser } from '../types';
 
 
 const PostInfo: React.FC = () => {
@@ -24,11 +26,25 @@ const PostInfo: React.FC = () => {
     const dispatch: any = useDispatch()
     const solutions = useTypedSelector(state => state.posts.solutions)
     const comments = useTypedSelector(state => state.posts.comments)
+
+    const selectedChannel = useTypedSelector(state => state.channels.selectedChannel);
+    const [showP2PManager, setShowP2PManager] = useState(false);
+    const [channelUsers, setChannelUsers] = useState<ChannelUser[]>([]);
     useEffect(() => {
         dispatch(GetChannelsThunk())
         dispatch(GetSolutionsByPostIdThunk(postState.id))
         dispatch(GetCommentsByPostIdThunk(postState.id))
     }, [])
+
+    useEffect(() => {
+        const loadChannelUsers = async () => {
+            if (postState.isP2pEnabled && selectedChannel?.id) {
+                const users = await api.GetChannelUsers(selectedChannel.id);
+                setChannelUsers(users || []);
+            }
+        };
+        loadChannelUsers();
+    }, [postState.id]);
     
     const handleCommentTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCommentText(event.target.value); 
@@ -97,6 +113,38 @@ const PostInfo: React.FC = () => {
                     <hr/>
                     <p> {postState.text}</p>
 
+                    {postState.type === PostType.TASK && (
+                        <div style={{borderTop: "1px solid #eee", paddingTop: "8px", marginTop: "4px"}}>
+                            <p className='baseP' style={{fontWeight: "bold"}}>
+                                P2P оценивание: {postState.isP2pEnabled ? 'включено' : 'выключено'}
+                            </p>
+                            {postState.isP2pEnabled && postState.p2pParam && (
+                                <>
+                                    <p className='baseP'>Способ распределения: {
+                                        postState.p2pParam.type === 'RANDOM' ? 'Случайный' :
+                                        postState.p2pParam.type === 'MANUAL' ? 'Ручной' :
+                                        'Самостоятельный выбор'
+                                    }</p>
+                                    <p className='baseP'>Анонимность: {
+                                        postState.p2pParam.visibility === 'ALL' ? 'Открытая' :
+                                        postState.p2pParam.visibility === 'PART' ? 'Частичная' :
+                                        'Полная анонимность'
+                                    }</p>
+                                    {postState.p2pParam.p2pDeadline && (
+                                        <p className='baseP'>Дедлайн проверки: {new Date(postState.p2pParam.p2pDeadline).toLocaleString()}</p>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                        
+                    )}
+
+                    {hasAnyRole([MANAGER, TEACHER]) && postState.type === PostType.TASK && postState.isP2pEnabled && (
+                        <button className={styles.button} style={{width: 'fit-content', marginTop: "10px",}} onClick={() => setShowP2PManager(true)}>
+                            P2P управление
+                        </button>
+                    )}
+
                 </div>
                 
                 <div className='simpleForm'>  
@@ -146,6 +194,18 @@ const PostInfo: React.FC = () => {
                         ))}
                     </div>
 
+                )}
+
+                {showP2PManager && (
+                    <div className="modal-overlay">
+                        <div className="modal-content large">
+                            <P2PManagerPersonal
+                                postId={postState.id}
+                                channelUsers={channelUsers}
+                                onClose={() => setShowP2PManager(false)}
+                            />
+                        </div>
+                    </div>
                 )}
 
 
