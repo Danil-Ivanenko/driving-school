@@ -145,7 +145,7 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
              <div className='course-block' onClick={() => setOpen(true)} style={{width : "90%"}}> Создать командное задание</div>
             {isOpen && (
                 <div className="modalOverlay" >
-                    <dialog  className='centerpointModal'   >  
+                    <dialog  className='centerpointModal'  style={{maxHeight: "80vh",  overflowY: "auto"  }}  >  
                         <p  style={{fontSize :"20px", margin :"0px",}} >Создать командное задание</p>
                         
                         <div>

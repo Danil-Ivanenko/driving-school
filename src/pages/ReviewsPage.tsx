@@ -6,11 +6,12 @@ import { useTypedSelector } from '../store';
 import { useDispatch } from 'react-redux';
 import { api } from '../API/api';
 import {GetChannelsThunk, SetSelectedChannelActionCreator} from '../reducers/channel-reducer'
-import { PostTypeTranslations, ReviewStatus, ReviewStatusTranslation, ReviewTasksDto, Task } from '../types';
+import { PostType, PostTypeTranslations, ReviewStatus, ReviewStatusTranslation, ReviewTasksDto, Task } from '../types';
 
 import HeaderComponent from '../Components/HeaderComponent';
 import OrderSolutionDialog from '../Components/Dialogs/OrderSolutionDialog';
 import OrderP2PostDialog from '../Components/Dialogs/OrderP2PostDialog';
+import OrderP2TeamTaskDialog from '../Components/Dialogs/OrderP2TeamTaskDialog';
 
 const ReviewsPage: React.FC = () => {
     const [reviews, setReviews] = useState<ReviewTasksDto>();
@@ -24,7 +25,7 @@ const ReviewsPage: React.FC = () => {
         setReviews(response)
         console.log(response)
     };
-
+    console.log(reviews)
     return (
         
     <div className="app-container">
@@ -40,7 +41,7 @@ const ReviewsPage: React.FC = () => {
                     <div className='containerCol' style={{ maxHeight: '100vh',   overflowY: 'auto'}}>
                         
                         {reviews?.personal.map((task) => (
-                            <div className='simpleForm' style={{ justifyContent :"space-between"}} key={task.targetSolutionId} >
+                            <div className='simpleForm' style={{ justifyContent :"space-between"}} key={task.id} >
                                 <div style={{display: "flex",justifyContent : "space-between",  gap:"5px", alignItems: "center"}}>
                                     <p className='headline'>{PostTypeTranslations[task.post.type]}: {task.post.label} </p>
 
@@ -50,12 +51,12 @@ const ReviewsPage: React.FC = () => {
                                     (<p className='headline' onClick={() => window.location.href = task.post.fileUrl!} style={{cursor : "pointer"}}> Файл: {task.post.fileName} </p>)
                                 }
                                 
-                                {task.post?.studentSolution != null &&
+                                {task?.targetSolution != null &&
                                     (
                                         <>
-                                            <p> Ответ: {task.post.studentSolution.text}</p>
-                                            {task.post.studentSolution.fileUrl != null && 
-                                                <p onClick={() => window.location.href = task.post.studentSolution!.fileUrl!} style={{cursor : "pointer"}}> Файл: {task.post.studentSolution.fileName}</p>
+                                            <p className='headline'> Ответ: {task?.targetSolution.text}</p>
+                                            {task?.targetSolution.fileUrl != null && 
+                                                <p className='headline' onClick={() => window.location.href = task?.targetSolution!.fileUrl!} style={{cursor : "pointer"}}> Файл: {task?.targetSolution.fileName}</p>
                                             }
                                             </>
                                     )
@@ -64,9 +65,48 @@ const ReviewsPage: React.FC = () => {
                                 {task?.owner != null && (
                                     <p>Сдал : {task.owner.surname} {task.owner.name}</p>
                                 )}
+                                <p className='baseP'>Проверить до: {task.post.p2pParam?.p2pDeadline}</p>
                                 <p>Статус провреки: {ReviewStatusTranslation[task.status]}</p>
                                 {task.status != ReviewStatus.EXPIRED && (
                                     < OrderP2PostDialog userId={task.owner.id} postId={task.post.id}   /> 
+                                )}
+                                 
+                            </div>
+
+                            
+                        ))}
+
+                        {reviews?.team.map((task) => (
+                            <div className='simpleForm' style={{ justifyContent :"space-between"}} key={task.id} >
+                                <div style={{display: "flex",justifyContent : "space-between",  gap:"5px", alignItems: "center"}}>
+                                    <p className='headline'>{PostTypeTranslations[PostType.TEAM_TASK]}: {task.task.label} </p>
+
+                                </div>
+                                <p> {task.task.text}</p>
+                                {task.task.documents[0]?.fileName != null && task.task.documents[0]?.fileUrl != null &&
+                                    (<p className='headline' onClick={() => window.location.href = task.task.documents[0].fileUrl!} style={{cursor : "pointer"}}> Файл: {task.task.documents[0].fileName} </p>)
+                                }
+                                
+                                    {task.targetTaskSolution != null && 
+                                    task.targetTaskSolution.documents.map((doc, index) => (
+                                        <p 
+                                        key={index}
+                                        className='headline' 
+                                        onClick={() => window.location.href = doc.fileUrl} 
+                                        style={{cursor: "pointer"}}
+                                        >
+                                        Файл: {doc.fileName}
+                                        </p>
+                                    ))
+                                }
+                               
+                                {task?.ownerTeam != null && (
+                                    <p>Сдала команда : {task.ownerTeam.name}</p>
+                                )}
+                                <p className='baseP'>Проверить до: {task.task.p2pParam?.p2pDeadline}</p>
+                                <p>Статус провреки: {ReviewStatusTranslation[task.status]}</p>
+                                {task.status != ReviewStatus.EXPIRED && (
+                                    < OrderP2TeamTaskDialog userId={task.ownerTeam.users[0].id} postId={task.task.id} teamId={task.ownerTeam.id}   /> 
                                 )}
                                  
                             </div>

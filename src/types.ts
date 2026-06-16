@@ -454,7 +454,7 @@ export type PersonalReviewTaskDto = {
     id : string,
     post : Post,
     owner : ChannelUser,
-    targetSolutionId : string,
+    targetSolution : StudentSolution,
     status : ReviewStatus
 };
 
@@ -462,7 +462,7 @@ export type TeamReviewTaskDto ={
     id :string,
     task : Task,
     ownerTeam : Team,
-    targetSolutionId : string,
+    targetTaskSolution : TaskSolutionDto,
     status : ReviewStatus
 }
 
