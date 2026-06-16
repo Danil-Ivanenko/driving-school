@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios';
-import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto, SetTeamMetricValueDto, GradeTableDto, DeadlinePenaltyDto } from '../types';
+import { tokenResponse, ErrorResponse, Channel, PostType, PostShort, Post, MaxChannelInfoAPI, CommandTeamType, CommandSolutionType, Task, ChannelUser, InviteDto, MarkDistribution, CreateMetricDTO, MetricDTO, MetricWithValuesDto, SetMetricValueDto, GradeDto, SetTeamMetricValueDto, GradeTableDto, DeadlinePenaltyDto, ReviewTasksDto } from '../types';
 import { FullInfo, CreateUser, UpdateUser, UserRole, SearchParams} from '../types';
 import { UserProfile, StudentSolution, CommentDTO } from '../types';
 import { TaskSolutionDto, SolutionVoteDto, VotingResultsDto, TaskDocumentDto, CreateSolutionVoteDto, CreateTaskSolutionDto, UpdateTaskSolutionDto, VoteResultDto, VoterInfoDto} from '../types';
@@ -1415,6 +1415,21 @@ async function getGradeTableByChannelId(channelId  : string) {
         console.error("Failed to fetch team:", e);
     }
 }
+
+async function getP2PJobs() {
+    try {
+
+        const { data } = await instance.get<ReviewTasksDto>(`api/p2p/jobs`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    } catch (e) {
+        console.error("Failed to fetch team:", e);
+    }
+}
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -1508,5 +1523,7 @@ export const api = {
     getUserTeamMark : getUserTeamMark,
     changePostVisibility : changePostVisibility,
     changeTeamMetricsVisibility : changeTeamMetricsVisibility,
-    getGradeTableByChannelId : getGradeTableByChannelId
+    getGradeTableByChannelId : getGradeTableByChannelId,
+
+    getP2PJobs: getP2PJobs
 }

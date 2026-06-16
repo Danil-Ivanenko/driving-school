@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 
-import { hasAnyRole, MANAGER, TEACHER } from "../RoleChecker";
+import { hasAnyRole, MANAGER, TEACHER, STUDENT } from "../RoleChecker";
 import { useTypedSelector } from "../store";
 import { useEffect } from 'react';
 import { GetMyProfileThunk } from '../reducers/myProfile-reducer';
@@ -33,6 +33,14 @@ const HeaderComponent: React.FC = () => {
                             style={ pathname == "/users" ? {backgroundColor: "#b5d7ed"} : {}}
                         >
                             Пользователи
+                        </div> ) }
+                    {hasAnyRole([STUDENT]) && (
+                        <div 
+                            className='course-block' 
+                            onClick={() => window.location.href = "review"}
+                            style={ pathname == "/review" ? {backgroundColor: "#b5d7ed"} : {}}
+                        >
+                            Проверка
                         </div> ) }
                     
                     <div onClick={signOut} className='course-block'> {myProfile.profile?.lastName} { myProfile.profile?.firstName } ↩</div>

@@ -426,5 +426,37 @@ export type DeadlinePenaltyDto ={
     step: number,
     value: number
 }
+export enum ReviewStatus{
+    PENDING = "PENDING",  
+    COMPLETED = "COMPLETED",
+    EXPIRED     = "EXPIRED"
+}
+
+export const ReviewStatusTranslation: Record<ReviewStatus, string> = {
+    [ReviewStatus.PENDING]: "на рассмотрении",
+    [ReviewStatus.COMPLETED]: "оценено",
+    [ReviewStatus.EXPIRED]: "просрочено"
+};
+
+export type PersonalReviewTaskDto = {
+    id : string,
+    post : Post,
+    owner : ChannelUser,
+    targetSolutionId : string,
+    status : ReviewStatus
+};
+
+export type TeamReviewTaskDto ={
+    id :string,
+    task : Task,
+    ownerTeam : Team,
+    targetSolutionId : string,
+    status : ReviewStatus
+}
+
+export type ReviewTasksDto ={
+    personal : PersonalReviewTaskDto[],
+    team : TeamReviewTaskDto[]
+}
 
 export type TaskSolutionType = 'LAST' | 'FIRST' | 'CAPITAN' | 'DEMOCRATIC' | 'QUALIFIED';

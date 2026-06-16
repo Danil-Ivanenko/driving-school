@@ -4,6 +4,7 @@ import LoginPage from './pages/loginPage'
 import MainPage from './pages/mainPage'
 import UsersPage from './pages/UsersPage'
 import './App.css';
+import ReviewsPage from './pages/ReviewsPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="login" element={<LoginPage />} />
         <Route path='main'  element={< MainPage />} />
         <Route path='users'  element={< UsersPage />} />
+        <Route path='review' element= { < ReviewsPage />} />
 
       </Routes>
     </BrowserRouter>
