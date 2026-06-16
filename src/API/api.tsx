@@ -109,7 +109,7 @@ async function DeletePost(id: string)   {
     }
 };
 
-async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string, file : File | null , controlPostTaskIds? : string[] , controlTaskIds? : string[] ,deadlinePenalty? : DeadlinePenaltyDto )   { 
+async function CreatePost(label: string, text: string, type : string, deadline: string, channelId :string, file : File | null , controlPostTaskIds? : string[] , controlTaskIds? : string[] ,deadlinePenalty? : DeadlinePenaltyDto, isP2pEnabled?: boolean, p2pParam?: any)   { 
     try
     {
         const formData = new FormData();
@@ -128,6 +128,17 @@ async function CreatePost(label: string, text: string, type : string, deadline: 
                 step: deadlinePenalty.step,
                 value: deadlinePenalty.value
          }));
+        }
+
+        if (isP2pEnabled) {
+            formData.append('isP2pEnabled', 'true');
+            if (p2pParam) {
+                formData.append('p2pParam.type', p2pParam.type);
+                formData.append('p2pParam.visibility', p2pParam.visibility);
+                if (p2pParam.p2pDeadline) {
+                    formData.append('p2pParam.p2pDeadline', p2pParam.p2pDeadline);
+                }
+            }
         }
         await instance.post(`api/posts`,
             formData,
@@ -577,7 +588,7 @@ async function DeleteComment(commentId : number)   {
     
 };
 
-async function CreateCommandTask( channelId :string, label: string, text: string, teamType : CommandTeamType, freeTeamCount: number, type : CommandSolutionType, minTeamSize : number, isCanRedistribute : boolean, deadline: string, qualifiedMin? : number | null, documents? : File | null , deadlinePenalty? : DeadlinePenaltyDto)   { 
+async function CreateCommandTask( channelId :string, label: string, text: string, teamType : CommandTeamType, freeTeamCount: number, type : CommandSolutionType, minTeamSize : number, isCanRedistribute : boolean, deadline: string, qualifiedMin? : number | null, documents? : File | null , deadlinePenalty? : DeadlinePenaltyDto, isP2pEnabled?: boolean, p2pParam?: any)   { 
     try
     {
         const formData = new FormData();
@@ -599,7 +610,18 @@ async function CreateCommandTask( channelId :string, label: string, text: string
                 value: deadlinePenalty.value
          }));
         }
-        
+
+        if (isP2pEnabled) {
+            formData.append('isP2pEnabled', 'true');
+            if (p2pParam) {
+                formData.append('p2pParam.type', p2pParam.type);
+                formData.append('p2pParam.visibility', p2pParam.visibility);
+                if (p2pParam.p2pDeadline) {
+                    formData.append('p2pParam.p2pDeadline', p2pParam.p2pDeadline);
+                }
+            }
+        }
+                
 
         const {data, status} = await instance.post(`api/tasks?channelId=${channelId}`,
             formData,
@@ -1430,6 +1452,61 @@ async function getP2PJobs() {
     }
 }
 
+
+async function getP2PPairsTeam(taskId: string) {
+    const { data } = await instance.get(`api/p2p/team/${taskId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    return data;
+}
+
+async function assignP2PTeam(dto: any) {
+    const { data } = await instance.post(`api/p2p/team/assign`, dto, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    return data;
+}
+
+async function reassignP2PTeam(pairId: string, dto: any) {
+    const { data } = await instance.patch(`api/p2p/team/${pairId}/reassign`, dto, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    return data;
+}
+
+async function deleteP2PTeam(pairId: string) {
+    await instance.delete(`api/p2p/team/${pairId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+}
+
+async function getP2PPairsPersonal(postId: string) {
+    const { data } = await instance.get(`api/p2p/personal/${postId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    return data;
+}
+
+async function assignP2PPersonal(dto: any) {
+    const { data } = await instance.post(`api/p2p/personal/assign`, dto, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    return data;
+}
+
+async function reassignP2PPersonal(pairId: string, dto: any) {
+    const { data } = await instance.patch(`api/p2p/personal/${pairId}/reassign`, dto, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    return data;
+}
+
+async function deleteP2PPersonal(pairId: string) {
+    await instance.delete(`api/p2p/personal/${pairId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+}
+
 export const api = {
     login : login,
     GetChannels : GetChannels,
@@ -1525,5 +1602,15 @@ export const api = {
     changeTeamMetricsVisibility : changeTeamMetricsVisibility,
     getGradeTableByChannelId : getGradeTableByChannelId,
 
-    getP2PJobs: getP2PJobs
+    getP2PJobs: getP2PJobs,
+
+    getP2PPairsTeam,
+    assignP2PTeam,
+    reassignP2PTeam,
+    deleteP2PTeam,
+
+    getP2PPairsPersonal,
+    assignP2PPersonal,
+    reassignP2PPersonal,
+    deleteP2PPersonal,
 }

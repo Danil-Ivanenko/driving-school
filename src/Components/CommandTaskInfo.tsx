@@ -18,6 +18,7 @@ import TeamInfo from './Dialogs/TeamInfo';
 import CreateTeamDialog from './Dialogs/CreateTeamDialog';
 import TaskSolutionManager from './Dialogs/TaskSolutionManager'; 
 import MetricsDialog from './Dialogs/MetricsDialog';
+import P2PManager from './Dialogs/P2PManager';
 
 
 const CommandTaskInfo: React.FC = () => {
@@ -33,6 +34,8 @@ const CommandTaskInfo: React.FC = () => {
     const [myTeam, setMyTeam] = useState<Team | null>(null);
 
     const [currentUser, setCurrentUser] = useState<any>(null);
+
+    const [showP2PManager, setShowP2PManager] = useState(false);
 
     useEffect(() => {
         if (hasAnyRole([STUDENT])) {
@@ -212,6 +215,29 @@ const CommandTaskInfo: React.FC = () => {
                             <p className='baseP' onClick={ChangeMetricsVisibility} >Видимость : {String(postState.isMetricsVisibleToStudents)}</p>
                         )}
                     <br></br>
+
+                    <div style={{borderTop: "1px solid #eee", paddingTop: "8px", marginTop: "4px"}}>
+                        <p className='baseP' style={{fontWeight: "bold"}}>
+                            P2P оценивание: {postState.isP2pEnabled ? 'включено' : 'выключено'}
+                        </p>
+                        {postState.isP2pEnabled && postState.p2pParam && (
+                            <>
+                                <p className='baseP'>Способ распределения: {
+                                    postState.p2pParam.type === 'RANDOM' ? 'Случайный' :
+                                    postState.p2pParam.type === 'MANUAL' ? 'Ручной' :
+                                    'Самостоятельный выбор'
+                                }</p>
+                                <p className='baseP'>Анонимность: {
+                                    postState.p2pParam.visibility === 'ALL' ? 'Открытая' :
+                                    postState.p2pParam.visibility === 'PART' ? 'Частичная' :
+                                    'Полная анонимность'
+                                }</p>
+                                {postState.p2pParam.p2pDeadline && (
+                                    <p className='baseP'>Дедлайн проверки: {new Date(postState.p2pParam.p2pDeadline).toLocaleString()}</p>
+                                )}
+                            </>
+                        )}
+                    </div>
                     
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
                         {/* {hasAnyRole([STUDENT]) && (
@@ -252,6 +278,11 @@ const CommandTaskInfo: React.FC = () => {
                                 Все решения ({solutionsCount})
                             </button>
                         )}
+                        {hasAnyRole([MANAGER, TEACHER]) && postState.isP2pEnabled && (
+                            <button className={styles.button} onClick={() => setShowP2PManager(true)}>
+                                P2P управление
+                            </button>
+                        )}
                     </div>
                     
                     {hasAnyRole([MANAGER,TEACHER]) && <p className='headline'>Создать команду:  < CreateTeamDialog taskId={postState.id} /></p> }
@@ -282,6 +313,18 @@ const CommandTaskInfo: React.FC = () => {
                         <TeamInfo team={team} />
                     </div>
                 ))}
+
+                {showP2PManager && (
+                    <div className="modal-overlay">
+                        <div className="modal-content large">
+                            <P2PManager
+                                taskId={postState.id}
+                                teams={postState.teams}
+                                onClose={() => setShowP2PManager(false)}
+                            />
+                        </div>
+                    </div>
+                )}
 
             </div>
         );

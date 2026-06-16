@@ -18,7 +18,7 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
     const [file, setFile] = useState<File| null>(null);
     const [postCommandSolutionType, setCommandSolutionType] = useState<CommandSolutionType>(CommandSolutionType.FIRST);
     const [qualifiedMin, setqualifiedMin] = useState<number | string>('');
-     const [minTeamSize, sertMinTeamSize] = useState<number | string>('');
+    const [minTeamSize, sertMinTeamSize] = useState<number | string>('');
 
     const [isCanRedistribute, setIsCanRedistribute ] = useState<boolean>(true);
     const [errorText, setErrorText] = useState<string>('');
@@ -26,6 +26,11 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
     const [unit, setUnit] = useState<UnitType>(UnitType.DAY);
     const [step, setStep] = useState<number>( 1);
     const [value, setValue] = useState<number>(1);
+
+    const [isP2pEnabled, setIsP2pEnabled] = useState<boolean>(false);
+    const [p2pType, setP2pType] = useState<string>('RANDOM');
+    const [p2pVisibility, setP2pVisibility] = useState<string>('ALL');
+    const [p2pDeadline, setP2pDeadline] = useState<string>('');
         
     const handleMinTeamSize = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -82,12 +87,24 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
     const dispatch: any = useDispatch()
     const selectedChannel = useTypedSelector(state => state.channels.selectedChannel);
 
+    const p2pParam = isP2pEnabled ? {
+        type: p2pType,
+        visibility: p2pVisibility,
+        p2pDeadline: p2pDeadline !== '' ? `${p2pDeadline}:00.000Z` : undefined
+    } : undefined;
+
     const CreateCommandTask = async () =>{
+        // const data = await api.CreateCommandTask(channelId, postName, postText, postCommandTeamType,
+        //         Number(commandCount), postCommandSolutionType, Number(minTeamSize),
+        //       isCanRedistribute, postDeadline, 
+        //       typeof qualifiedMin === 'string' ? null : Number(qualifiedMin) , 
+        //       file , {unit : unit, step : step, value : value})
         const data = await api.CreateCommandTask(channelId, postName, postText, postCommandTeamType,
-                Number(commandCount), postCommandSolutionType, Number(minTeamSize),
-              isCanRedistribute, postDeadline, 
-              typeof qualifiedMin === 'string' ? null : Number(qualifiedMin) , 
-              file , {unit : unit, step : step, value : value})
+            Number(commandCount), postCommandSolutionType, Number(minTeamSize),
+            isCanRedistribute, postDeadline,
+            typeof qualifiedMin === 'string' ? null : Number(qualifiedMin),
+            file, {unit, step, value},
+            isP2pEnabled, p2pParam)
 
         if(axios.isAxiosError<ErrorResponse>(data))
         {
@@ -114,6 +131,10 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
             setValue(1);
             setUnit(UnitType.DAY);
             setStep(1)
+            setIsP2pEnabled(false);
+            setP2pType('RANDOM');
+            setP2pVisibility('ALL');
+            setP2pDeadline('');
             dispatch(GetPostsThunk(selectedChannel!.id))
         }
     }
@@ -125,7 +146,7 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
             {isOpen && (
                 <div className="modalOverlay" >
                     <dialog  className='centerpointModal'   >  
-                        <p  style={{fontSize :"20px", margin :"0px"}} >Создать командное задание</p>
+                        <p  style={{fontSize :"20px", margin :"0px",}} >Создать командное задание</p>
                         
                         <div>
                             <label htmlFor="post-name" >Название*</label>
@@ -222,6 +243,46 @@ const CreateCommandTaskDialog: React.FC<{channelId : string}> = ({channelId})  =
                             </div>
                             </>
                         )}
+
+                        <div style={{borderTop: "1px solid #ccc", paddingTop: "10px", marginTop: "5px"}}>
+                            <div style={{display: "flex", alignItems: "center", gap: "10px"}}>
+                                <label style={{fontWeight: "bold", margin: 0}}>P2P оценивание</label>
+                                <input
+                                    type="checkbox"
+                                    checked={isP2pEnabled}
+                                    onChange={(e) => setIsP2pEnabled(e.target.checked)}
+                                />
+                            </div>
+
+                            {isP2pEnabled && (
+                                <>
+                                    <div>
+                                        <label>Способ распределения*</label>
+                                        <select value={p2pType} onChange={(e) => setP2pType(e.target.value)}>
+                                            <option value="RANDOM">Случайный</option>
+                                            <option value="MANUAL">Ручной</option>
+                                            <option value="HIMSELF">Самостоятельный выбор</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>Анонимность*</label>
+                                        <select value={p2pVisibility} onChange={(e) => setP2pVisibility(e.target.value)}>
+                                            <option value="NONE">Полная анонимность</option>
+                                            <option value="PART">Частичная (видна работа, не автор)</option>
+                                            <option value="ALL">Открытая</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>Дедлайн проверки</label>
+                                        <input
+                                            type='datetime-local'
+                                            value={p2pDeadline}
+                                            onChange={(e) => setP2pDeadline(e.target.value)}
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
 
 
                         <div>                    
